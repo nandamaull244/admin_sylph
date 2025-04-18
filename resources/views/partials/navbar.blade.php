@@ -15,7 +15,7 @@
       </ul>
       <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
         <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-          <a href="#" target="_blank"
+          <a href="{{ url('/') }}"
             class="btn btn-primary me-2"><span class="d-none d-md-block">Admin</span> <span class="d-block d-md-none">Pro</span></a>
          
           <li class="nav-item dropdown">

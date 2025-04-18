@@ -147,9 +147,15 @@ class UserController extends Controller
 
         $user = $response->json()[0] ?? null;
 
+        $images = Http::withHeaders([
+            'apikey' => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+        ])->get(config('services.supabase.url') . "/rest/v1/image_targets?user_id=eq.{$id}&select=*")->json();
+
         if (!$user) abort(404);
 
-        return view('users.edit', compact('user'));
+        
+        return view('users.edit', compact('user', 'images'));
     }
 
     public function update(Request $request, $id)
@@ -163,7 +169,33 @@ class UserController extends Controller
             'email' => $request->email
         ]);
 
-        return redirect()->route('users.index')->with('success', 'User berhasil diperbarui.');
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $file) {
+                $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
+                $path = "image_targets/{$id}/{$filename}";
+
+                Http::withHeaders([
+                    'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+                    'Content-Type' => $file->getMimeType()
+                ])->withBody(
+                    file_get_contents($file),
+                    $file->getMimeType()
+                )->put(config('services.supabase.url') . "/storage/v1/object/media/{$path}");
+
+                Http::withHeaders([
+                    'apikey' => config('services.supabase.service_key'),
+                    'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+                    'Content-Type' => 'application/json'
+                ])->post(config('services.supabase.url') . '/rest/v1/image_targets', [
+                    'id' => (string) Str::uuid(),
+                    'user_id' => $id,
+                    'name' => $filename,
+                    'image_url' => config('services.supabase.url') . "/storage/v1/object/public/media/{$path}"
+                ]);
+            }
+        }
+
+        return redirect()->route('users.index')->with('success', 'User dan image baru berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -175,7 +207,11 @@ class UserController extends Controller
 
         foreach ($images as $image) {
             $path = str_replace(config('services.supabase.url') . "/storage/v1/object/public/media/", '', $image['image_url']);
-            Storage::disk('supabase')->delete($path);
+            Http::withHeaders([
+                'apikey' => config('services.supabase.service_key'),
+                'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+            ])->delete(config('services.supabase.url') . "/storage/v1/object/media/{$path}");
+            
 
             Http::withHeaders([
                 'apikey' => config('services.supabase.service_key'),
@@ -190,4 +226,77 @@ class UserController extends Controller
 
         return redirect()->route('users.index')->with('success', 'User dan semua image target dihapus.');
     }
+    
+    public function deleteImage($id)
+    {
+        $image = Http::withHeaders([
+            'apikey' => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+        ])->get(config('services.supabase.url') . "/rest/v1/image_targets?id=eq.{$id}&select=*")->json()[0] ?? null;
+    
+        if (!$image) {
+            return redirect()->back()->with('error', 'Image tidak ditemukan.');
+        }
+    
+        $parsed = parse_url($image['image_url']);
+        $path = ltrim($parsed['path'], '/storage/v1/object/public/media/');
+    
+        $deleteFile = Http::withHeaders([
+            'apikey' => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+        ])->delete(config('services.supabase.url') . "/storage/v1/object/media/{$path}");
+    
+        $deleteData = Http::withHeaders([
+            'apikey' => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+        ])->delete(config('services.supabase.url') . "/rest/v1/image_targets?id=eq.{$id}");
+    
+        // Anggap 404 = berhasil
+        if (
+            ($deleteFile->successful() || $deleteFile->status() === 404) &&
+            $deleteData->successful()
+        ) {
+            return redirect()->back()->with('success', 'Gambar berhasil dihapus.');
+        }
+    
+        return redirect()->back()->with('error', 'Gagal menghapus gambar meskipun file kemungkinan sudah tidak ada.');
+    }
+    
+
+
+
+
+
+
+
+    // public function deleteImage($id)
+    // {
+    //     $image = Http::withHeaders([
+    //         'apikey' => config('services.supabase.service_key'),
+    //         'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+    //     ])->get(config('services.supabase.url') . "/rest/v1/image_targets?id=eq.{$id}&select=*")->json()[0] ?? null;
+    
+    //     if (!$image) {
+    //         return response()->json(['error' => 'Image tidak ditemukan.'], 404);
+    //     }
+    
+    //     $path = str_replace(env('SUPABASE_URL') . "/storage/v1/object/public/media/", '', $image['image_url']);
+    
+    //     $deleteFile = Http::withHeaders([
+    //         'apikey' => config('services.supabase.service_key'),
+    //         'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+    //     ])->delete(config('services.supabase.url') . "/storage/v1/object/media/{$path}");
+    
+    //     $deleteData = Http::withHeaders([
+    //         'apikey' => env('SUPABASE_SERVICE_KEY'),
+    //         'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+    //     ])->delete(config('services.supabase.url') . "/rest/v1/image_targets?id=eq.{$id}");
+    
+    //     if ($deleteFile->successful() && $deleteData->successful()) {
+    //         return response()->json(['message' => 'Gambar berhasil dihapus.']);
+    //     }
+    
+    //     return response()->json(['error' => 'Gagal menghapus gambar.'], 500);
+    // }
+    
 }
