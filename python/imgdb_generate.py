@@ -5,8 +5,8 @@ import numpy as np
 import requests
 from supabase import create_client, Client
 
-SUPABASE_URL = os.environ.get("https://zqwvmdjwuaeolmdswpvp.supabase.co")
-SUPABASE_KEY = os.environ.get("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxd3ZtZGp3dWFlb2xtZHN3cHZwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Mzg1NDU1NCwiZXhwIjoyMDU5NDMwNTU0fQ.w_BjQ8ACtuwtkKmb99u4ZlNG18ZApEEsEHYmCS7MEW4")
+SUPABASE_URL = "https://zqwvmdjwuaeolmdswpvp.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpxd3ZtZGp3dWFlb2xtZHN3cHZwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Mzg1NDU1NCwiZXhwIjoyMDU5NDMwNTU0fQ.w_BjQ8ACtuwtkKmb99u4ZlNG18ZApEEsEHYmCS7MEW4"
 bucket = "media"
 folder = "imgdb_files"
 
