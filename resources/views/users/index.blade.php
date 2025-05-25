@@ -37,6 +37,7 @@
                         <th>Nama</th>
                         <th>Email</th>
                         <th>Image Targets</th>
+                        <th>File .mind</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
