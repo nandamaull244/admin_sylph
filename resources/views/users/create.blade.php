@@ -42,8 +42,21 @@
                                 style="cursor:pointer;">Drop gambar di sini atau klik untuk pilih</div>
                             <input type="file" id="fileInput" name="images[]" multiple required class="form-control d-none">
                         </div>
-
                         <div id="previewContainer" class="d-flex flex-wrap gap-2 mb-3"></div>
+                    
+                        <div class="mb-3">
+                            <label>Upload File .mind (harus sesuai urutan dan nama dengan gambar)</label>
+                            <div id="mindDropzone" class="border border-secondary p-3 mb-2 text-center" style="cursor:pointer;">
+                                Drop file .mind di sini atau klik untuk pilih
+                            </div>
+                            <input type="file" id="mindFileInput" name="minds[]" multiple required class="form-control d-none">
+                        </div>
+
+                        <div id="mindPreviewContainer" class="d-flex flex-wrap gap-2 mb-3"></div>
+                        <div class="alert alert-info">
+                            File <strong>.mind</strong> harus merupakan hasil kompilasi dari gambar yang di-upload.
+                            <br>Contoh: upload <code>ikan.jpg</code> & <code>ikan.jpg.mind</code>
+                        </div>
 
                         <button class="btn btn-success">Simpan</button>
                     </form>

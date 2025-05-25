@@ -13,5 +13,7 @@ Route::get('/users/{id}/edit', [UserController::class, 'edit'])->name('users.edi
 Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update');
 Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 Route::delete('/images/{id}', [UserController::class, 'deleteImage'])->name('images.destroy');
+Route::delete('/mind-files/{id}', [UserController::class, 'deleteMindFile'])->name('mind-files.delete');
+
 
 

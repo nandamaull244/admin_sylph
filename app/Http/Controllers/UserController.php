@@ -48,6 +48,25 @@ class UserController extends Controller
                     $html .= '</div>';
                     return $html;
                 })
+                ->addColumn('mind_files', function ($user) {
+                    $mindFiles = Http::withHeaders([
+                        'apikey' => config('services.supabase.service_key'),
+                        'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+                    ])->get(config('services.supabase.url') . "/rest/v1/mind_files?user_id=eq." . $user['id'] . "&select=*")->json();
+
+                    if (empty($mindFiles)) {
+                        return '<span class="text-muted">Tidak ada file .mind</span>';
+                    }
+
+                    $html = '<ul style="padding-left: 15px;">';
+                    foreach ($mindFiles as $mind) {
+                        $html .= '<li><a href="' . $mind['mind_url'] . '" target="_blank">' . $mind['name'] . '</a></li>';
+                    }
+                    $html .= '</ul>';
+
+                    return $html;
+                })
+
                 ->addColumn('action', function ($user) {
                     $edit = '<a href="' . route('users.edit', $user['id']) . '" class="btn btn-warning btn-sm">Edit</a> ';
                     $delete = '<form action="' . route('users.destroy', $user['id']) . '" method="POST" style="display:inline-block;">'
@@ -55,7 +74,7 @@ class UserController extends Controller
                         '<button class="btn btn-danger btn-sm" onclick="return confirm(\'Yakin hapus user ini?\')">Hapus</button></form>';
                     return $edit . $delete;
                 })
-                ->rawColumns(['image_url', 'action'])
+                ->rawColumns(['image_url','mind_files','action'])
                 ->make(true);
         }
 
@@ -68,96 +87,131 @@ class UserController extends Controller
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'name'  => 'required',
-        'email' => 'required|email',
-        'password' => 'required',
-        'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
+    {
+        $request->validate([
+            'name'     => 'required',
+            'email'    => 'required|email',
+            'password' => 'required',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            'minds.*'  => 'required', // pastikan file .mind diizinkan
+        ]);
 
-    // 1. Daftarkan user ke Supabase Auth (Admin API)
-    $authResponse = Http::withHeaders([
-        'apikey'        => config('services.supabase.service_key'),
-        'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
-        'Content-Type'  => 'application/json',
-    ])->post(config('services.supabase.url') . '/auth/v1/admin/users', [
-        'email'    => $request->email,
-        'password' => $request->password,
-        'email_confirm' => true, // agar user tidak perlu verifikasi email
-    ]);
+        // 1. Daftarkan user ke Supabase Auth (Admin API)
+        $authResponse = Http::withHeaders([
+            'apikey'        => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+            'Content-Type'  => 'application/json',
+        ])->post(config('services.supabase.url') . '/auth/v1/admin/users', [
+            'email'    => $request->email,
+            'password' => $request->password,
+            'email_confirm' => true, // agar user tidak perlu verifikasi email
+        ]);
 
-    if (! $authResponse->successful()) {
-        return back()
-            ->withErrors(['error' => 'Gagal mendaftarkan user ke Supabase Auth: ' . $authResponse->body()])
-            ->withInput();
-    }
-
-    // 2. Ambil ID langsung dari root JSON
-    $json = $authResponse->json();
-    $user_id = $json['id'] ?? abort(500, 'Tidak bisa mendapat ID dari Supabase Auth');
-
-    // 3. Tandai email sudah diverifikasi
-    $verifiedAt = now()->toIso8601String();
-    Http::withHeaders([
-        'apikey'        => config('services.supabase.service_key'),
-        'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
-        'Content-Type'  => 'application/json',
-    ])->patch(config('services.supabase.url') . "/auth/v1/admin/users/{$user_id}", [
-        'email_confirmed_at' => $verifiedAt,
-    ]);
-
-    // 4. Simpan ke tabel users (tanpa password)
-    $userResponse = Http::withHeaders([
-        'apikey'        => config('services.supabase.service_key'),
-        'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
-        'Content-Type'  => 'application/json',
-    ])->post(config('services.supabase.url') . '/rest/v1/users', [
-        'id'    => $user_id,
-        'email' => $request->email,
-        'name'  => $request->name,
-    ]);
-
-    if (! $userResponse->successful()) {
-        Log::error('Supabase insert users failed: '.$userResponse->status().' '.$userResponse->body());
-        return back()
-            ->withErrors(['error' => 'Gagal menyimpan data user: '.$userResponse->body()])
-            ->withInput();
-    }
-
-    // 5. Upload image_targets jika ada
-    if ($request->hasFile('images')) {
-        foreach ($request->file('images') as $file) {
-            $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
-            $path = "image_targets/{$user_id}/{$filename}";
-
-            // Upload ke Supabase Storage
-            Http::withHeaders([
-                'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
-                'Content-Type'  => $file->getMimeType(),
-            ])->withBody(
-                file_get_contents($file),
-                $file->getMimeType()
-            )->put(config('services.supabase.url') . "/storage/v1/object/media/{$path}");
-
-            // Simpan metadata image
-            $imageUrl = config('services.supabase.url') . "/storage/v1/object/public/media/{$path}";
-            Http::withHeaders([
-                'apikey'        => config('services.supabase.service_key'),
-                'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
-                'Content-Type'  => 'application/json',
-            ])->post(config('services.supabase.url') . '/rest/v1/image_targets', [
-                'id'        => (string) Str::uuid(),
-                'user_id'   => $user_id,
-                'name'      => $filename,
-                'image_url' => $imageUrl,
-            ]);
+        if (! $authResponse->successful()) {
+            return back()
+                ->withErrors(['error' => 'Gagal mendaftarkan user ke Supabase Auth: ' . $authResponse->body()])
+                ->withInput();
         }
-    }
 
-    return redirect()->route('users.index')
-        ->with('success', 'User dan image target berhasil ditambahkan.');
-}
+        // 2. Ambil ID langsung dari root JSON
+        $json = $authResponse->json();
+        $user_id = $json['id'] ?? abort(500, 'Tidak bisa mendapat ID dari Supabase Auth');
+
+        // 3. Tandai email sudah diverifikasi
+        $verifiedAt = now()->toIso8601String();
+        Http::withHeaders([
+            'apikey'        => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+            'Content-Type'  => 'application/json',
+        ])->patch(config('services.supabase.url') . "/auth/v1/admin/users/{$user_id}", [
+            'email_confirmed_at' => $verifiedAt,
+        ]);
+
+        // 4. Simpan ke tabel users (tanpa password)
+        $userResponse = Http::withHeaders([
+            'apikey'        => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+            'Content-Type'  => 'application/json',
+        ])->post(config('services.supabase.url') . '/rest/v1/users', [
+            'id'    => $user_id,
+            'email' => $request->email,
+            'name'  => $request->name,
+        ]);
+
+        if (! $userResponse->successful()) {
+            Log::error('Supabase insert users failed: '.$userResponse->status().' '.$userResponse->body());
+            return back()
+                ->withErrors(['error' => 'Gagal menyimpan data user: '.$userResponse->body()])
+                ->withInput();
+        }
+
+        // 5. Upload image_targets jika ada
+        if ($request->hasFile('images') ) {
+            foreach ($request->file('images') as $file) {
+                $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
+                $path = "image_targets/{$user_id}/{$filename}";
+
+                // Upload ke Supabase Storage
+                Http::withHeaders([
+                    'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+                    'Content-Type'  => $file->getMimeType(),
+                ])->withBody(
+                    file_get_contents($file),
+                    $file->getMimeType()
+                )->put(config('services.supabase.url') . "/storage/v1/object/media/{$path}");
+
+                // Simpan metadata image
+                $imageUrl = config('services.supabase.url') . "/storage/v1/object/public/media/{$path}";
+                Http::withHeaders([
+                    'apikey'        => config('services.supabase.service_key'),
+                    'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+                    'Content-Type'  => 'application/json',
+                ])->post(config('services.supabase.url') . '/rest/v1/image_targets', [
+                    'id'        => (string) Str::uuid(),
+                    'user_id'   => $user_id,
+                    'name'      => $filename,
+                    'image_url' => $imageUrl,
+                    'mind_url'  => null,
+                ]);
+            }
+        }
+        // ✅ Upload file .mind (bisa banyak)
+        if ($request->hasFile('minds')) {
+            foreach ($request->file('minds') as $mind) {
+                $filename = Str::random(10) . '.' . $mind->getClientOriginalExtension();
+                $path = "minds/{$user_id}/{$filename}";
+
+                // Upload ke Supabase Storage
+                Http::withHeaders([
+                    'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+                    'Content-Type'  => $mind->getMimeType(),
+                ])->withBody(
+                    file_get_contents($mind),
+                    $mind->getMimeType()
+                )->put(config('services.supabase.url') . "/storage/v1/object/media/{$path}");
+
+                // Simpan metadata file .mind
+                $mindUrl = config('services.supabase.url') . "/storage/v1/object/public/media/{$path}";
+                $mindResponse = Http::withHeaders([
+                    'apikey'        => config('services.supabase.service_key'),
+                    'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+                    'Content-Type'  => 'application/json',
+                ])->post(config('services.supabase.url') . '/rest/v1/mind_files', [
+                    'id'        => (string) Str::uuid(),
+                    'user_id'   => $user_id,
+                    'name'      => $filename,
+                    'mind_url'  => $mindUrl,
+                ]);
+
+                if (!$mindResponse->successful()) {
+                    Log::error('Upload mind metadata gagal: '.$mindResponse->body());
+                }
+            }
+        }
+
+        return redirect()->route('users.index')
+            ->with('success', 'User, image target, dan file mind berhasil ditambahkan.');
+    }
 
 
 
@@ -181,10 +235,15 @@ class UserController extends Controller
             'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
         ])->get(config('services.supabase.url') . "/rest/v1/image_targets?user_id=eq.{$id}&select=*")->json();
 
+        $mindFiles = Http::withHeaders([
+            'apikey' => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+        ])->get(config('services.supabase.url') . "/rest/v1/mind_files?user_id=eq.{$id}&select=*")->json();
+
         if (!$user) abort(404);
 
         
-        return view('users.edit', compact('user', 'images'));
+        return view('users.edit', compact('user', 'images','mindFiles'));
     }
 
     public function update(Request $request, $id)
@@ -271,6 +330,40 @@ class UserController extends Controller
             }
         }
 
+        // ✅ Upload file .mind (bisa banyak)
+        if ($request->hasFile('minds')) {
+            foreach ($request->file('minds') as $mind) {
+                $filename = Str::random(10) . '.' . $mind->getClientOriginalExtension();
+                $path = "minds/{$id}/{$filename}";
+
+                // Upload ke Supabase Storage
+                Http::withHeaders([
+                    'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+                    'Content-Type'  => $mind->getMimeType(),
+                ])->withBody(
+                    file_get_contents($mind),
+                    $mind->getMimeType()
+                )->put(config('services.supabase.url') . "/storage/v1/object/media/{$path}");
+
+                // Simpan metadata file .mind
+                $mindUrl = config('services.supabase.url') . "/storage/v1/object/public/media/{$path}";
+                $mindEditResponse = Http::withHeaders([
+                    'apikey'        => config('services.supabase.service_key'),
+                    'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+                    'Content-Type'  => 'application/json',
+                ])->post(config('services.supabase.url') . '/rest/v1/mind_files', [
+                    'id'        => (string) Str::uuid(),
+                    'user_id'   => $id,
+                    'name'      => $filename,
+                    'mind_url'  => config('services.supabase.url') . "/storage/v1/object/public/media/{$path}",
+                ]);
+
+                if (!$mindEditResponse->successful()) {
+                    Log::error('Edit mind metadata gagal: '.$mindEditResponse->body());
+                }
+            }
+        }
+
         return redirect()->route('users.index')->with('success', 'User berhasil diperbarui.');
     }
 
@@ -295,6 +388,24 @@ class UserController extends Controller
                 'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
             ])->delete(config('services.supabase.url') . "/rest/v1/image_targets?id=eq.{$image['id']}");
         }
+
+         $minds = Http::withHeaders([
+            'apikey' => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+        ])->get(config('services.supabase.url') . "/rest/v1/mind_files?user_id=eq.{$id}&select=*")->json();
+        // Hapus file .mind
+        foreach ($minds as $mind) {
+            $mindPath = str_replace(config('services.supabase.url') . "/storage/v1/object/public/media/", '', $mind['mind_url']);
+            Http::withHeaders([
+                'apikey' => config('services.supabase.service_key'),
+                'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+            ])->delete(config('services.supabase.url') . "/storage/v1/object/media/{$mindPath}");
+
+            Http::withHeaders([
+                'apikey' => config('services.supabase.service_key'),
+                'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+            ])->delete(config('services.supabase.url') . "/rest/v1/mind_files?id=eq.{$mind['id']}");
+        }
         // Hapus user dari tabel users
         $deleteUser = Http::withHeaders([
             'apikey' => config('services.supabase.service_key'),
@@ -312,6 +423,13 @@ class UserController extends Controller
             return redirect()->route('users.index')->with('success', 'User dan semua image target berhasil dihapus.');
         }
 
+        // Log error detail jika gagal menghapus user atau auth
+        if ($deleteUser->failed()) {
+            Log::error('Gagal menghapus user dari tabel users: ' . $deleteUser->body());
+        }
+        if ($deleteAuth->failed()) {
+            Log::error('Gagal menghapus user dari Supabase Auth: ' . $deleteAuth->body());
+        }
         return redirect()->back()->with('error', 'Gagal menghapus user.')->withErrors([
             'deleteUser' => $deleteUser->body(),
             'deleteAuth' => $deleteAuth->body(),
@@ -356,6 +474,46 @@ class UserController extends Controller
             'deleteData' => $deleteData->body(),
         ]);
     }
+
+    public function deleteMindFile($id)
+    {
+        // 1. Ambil data file dari Supabase DB
+        $mind = Http::withHeaders([
+            'apikey'        => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+        ])->get(config('services.supabase.url') . "/rest/v1/mind_files?id=eq.{$id}&select=*")->json()[0] ?? null;
+
+        if (!$mind) {
+            return redirect()->back()->with('error', 'File .mind tidak ditemukan.');
+        }
+
+        // 2. Ambil path file dari URL public-nya
+        $parsedUrl = parse_url($mind['mind_url']);
+        $pathInStorage = str_replace('/storage/v1/object/public/media/', '', $parsedUrl['path']);
+
+        // 3. Hapus file dari Storage
+        $deleteFile = Http::withHeaders([
+            'apikey'        => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+        ])->delete(config('services.supabase.url') . "/storage/v1/object/media/{$pathInStorage}");
+
+        // 4. Hapus data dari table image_targets
+        $deleteData = Http::withHeaders([
+            'apikey'        => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+        ])->delete(config('services.supabase.url') . "/rest/v1/mind_files?id=eq.{$id}");
+
+        // 5. Cek keberhasilan
+        if (($deleteFile->successful() || $deleteFile->status() === 404) && $deleteData->successful()) {
+            return redirect()->back()->with('success', 'File .mind berhasil dihapus.');
+        }
+
+        return redirect()->back()->with('error', 'Gagal menghapus file .mind.')->withErrors([
+            'deleteFile' => $deleteFile->body(),
+            'deleteData' => $deleteData->body(),
+        ]);
+    }
+
 
     
 

@@ -29,6 +29,7 @@
                 { data: 'name', name: 'name' },
                 { data: 'email', name: 'email' },
                 { data: 'image_url', name: 'image_url', orderable: false, searchable: false },
+                { data: 'mind_files', name: 'mind_files', orderable: false, searchable: false },
                 { data: 'action', name: 'action', orderable: false, searchable: false },
             ]
         });
@@ -173,8 +174,128 @@
             form.submit();
         });
     });
+
+        // Hapus .mind
+    document.querySelectorAll('.delete-mind-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
+            const action = this.dataset.action;
+            if (!confirm('Yakin ingin menghapus file .mind ini?')) return;
+
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = action;
+
+            const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = csrf;
+
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+
+            form.appendChild(csrfInput);
+            form.appendChild(methodInput);
+            document.body.appendChild(form);
+            form.submit();
+        });
+    });
 });
 </script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    function setupMindUploader({ inputId, dropzoneId, previewContainerId }) {
+      const input = document.getElementById(inputId);
+      const dropzone = document.getElementById(dropzoneId);
+      const previewContainer = document.getElementById(previewContainerId);
+      let dt = new DataTransfer();
+
+      if (!input || !dropzone || !previewContainer) return;
+
+      dropzone.addEventListener('click', () => input.click());
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, e => {
+          e.preventDefault();
+          dropzone.classList.add('bg-light');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, e => {
+          e.preventDefault();
+          dropzone.classList.remove('bg-light');
+        });
+      });
+
+      dropzone.addEventListener('drop', e => {
+        const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.mind'));
+        addMindFilesToPreview(files);
+      });
+
+      input.addEventListener('change', function () {
+        const files = Array.from(this.files).filter(f => f.name.endsWith('.mind'));
+        addMindFilesToPreview(files);
+      });
+
+      function addMindFilesToPreview(files) {
+        previewContainer.innerHTML = '';
+        dt = new DataTransfer();
+
+        files.forEach(file => {
+          dt.items.add(file);
+
+          const wrapper = document.createElement('div');
+          wrapper.className = 'border p-2 mb-2 position-relative';
+
+          const fileName = document.createElement('div');
+          fileName.textContent = file.name;
+          fileName.classList.add('small');
+
+          const close = document.createElement('button');
+          close.innerHTML = '&times;';
+          close.classList.add('btn', 'btn-sm', 'btn-danger', 'position-absolute');
+          close.style.top = '0';
+          close.style.right = '0';
+
+          close.onclick = function () {
+            const newFiles = Array.from(dt.files).filter(f => f !== file);
+            dt = new DataTransfer();
+            newFiles.forEach(f => dt.items.add(f));
+            input.files = dt.files;
+            addMindFilesToPreview(dt.files);
+          };
+
+          wrapper.appendChild(fileName);
+          wrapper.appendChild(close);
+          previewContainer.appendChild(wrapper);
+        });
+
+        input.files = dt.files;
+      }
+    }
+
+    // Inisialisasi uploader untuk Create
+    setupMindUploader({
+      inputId: 'mindFileInput',
+      dropzoneId: 'mindDropzone',
+      previewContainerId: 'mindPreviewContainer'
+    });
+
+    // Inisialisasi uploader untuk Edit
+    setupMindUploader({
+      inputId: 'mindFileInputEdit',
+      dropzoneId: 'mindDropzoneEdit',
+      previewContainerId: 'mindPreviewContainerEdit'
+    });
+  });
+</script>
+
+
+
 
 
 
