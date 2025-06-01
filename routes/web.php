@@ -3,6 +3,7 @@
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TrackingController;
 
 
 Route::get('/', [AdminController::class, 'index'])->name('admin.index');
@@ -14,6 +15,9 @@ Route::put('/users/{id}', [UserController::class, 'update'])->name('users.update
 Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 Route::delete('/images/{id}', [UserController::class, 'deleteImage'])->name('images.destroy');
 Route::delete('/mind-files/{id}', [UserController::class, 'deleteMindFile'])->name('mind-files.delete');
+
+// tracking routes
+Route::get('/tracking', [TrackingController::class, 'index'])->name('tracking.index');
 
 
 
