@@ -37,6 +37,14 @@
                       <span class="hide-menu">Tambah akun</span>
                   </a>
               </li>
+              <li class="sidebar-item">
+                  <a class="sidebar-link" href="https://hiukim.github.io/mind-ar-js-doc/tools/compile" target="_blank" aria-expanded="false">
+                      <span>
+                          <iconify-icon icon="solar:document-bold" class="fs-6"></iconify-icon>
+                      </span>
+                      <span class="hide-menu">Compile .mind</span>
+                  </a>
+              </li>
               {{-- <li class="sidebar-item">
                   <a class="sidebar-link" href="./sample-page.html" aria-expanded="false">
                       <span>
