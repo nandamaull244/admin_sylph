@@ -144,11 +144,12 @@ class UserController extends Controller
                 ->withErrors(['error' => 'Gagal menyimpan data user: '.$userResponse->body()])
                 ->withInput();
         }
-
+        $imageTargets = [];
         // 5. Upload image_targets jika ada
         if ($request->hasFile('images') ) {
             foreach ($request->file('images') as $file) {
-                $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $filename = now()->format('YmdHis') . '.' . $file->getClientOriginalName();
                 $path = "image_targets/{$user_id}/{$filename}";
 
                 // Upload ke Supabase Storage
@@ -162,24 +163,38 @@ class UserController extends Controller
 
                 // Simpan metadata image
                 $imageUrl = config('services.supabase.url') . "/storage/v1/object/public/media/{$path}";
+                $imageId = (string) Str::uuid();
+         
                 Http::withHeaders([
                     'apikey'        => config('services.supabase.service_key'),
                     'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
                     'Content-Type'  => 'application/json',
                 ])->post(config('services.supabase.url') . '/rest/v1/image_targets', [
-                    'id'        => (string) Str::uuid(),
+                    'id'        => $imageId,
                     'user_id'   => $user_id,
                     'name'      => $filename,
                     'image_url' => $imageUrl,
-                    'mind_url'  => null,
                 ]);
+
+                // Simpan ke array untuk digunakan nanti
+                $imageTargets[$originalName] = [
+                    'id'        => $imageId,
+                    'user_id'   => $user_id,
+                    'name'      => $filename,
+                    'image_url' => $imageUrl,
+                ];
             }
         }
         // ✅ Upload file .mind (bisa banyak)
         if ($request->hasFile('minds')) {
-            foreach ($request->file('minds') as $mind) {
-                $filename = Str::random(10) . '.' . $mind->getClientOriginalExtension();
-                $path = "minds/{$user_id}/{$filename}";
+            $mindFiles = $request->file('minds');
+            if(count($mindFiles) !== count($imageTargets)) {
+                return back()->withErrors(['error' => 'Jumlah file .mind harus sama dengan jumlah image.']);
+            }
+            foreach ($mindFiles as $mind) {
+                $mindNameOnly = pathinfo($mind->getClientOriginalName(), PATHINFO_FILENAME);
+                $MindFileName = now()->format('YmdHis') . '_' . pathinfo($mind->getClientOriginalName(), PATHINFO_FILENAME) . '.' . $mind->getClientOriginalExtension();
+                $path = "minds/{$user_id}/{$MindFileName}";
 
                 // Upload ke Supabase Storage
                 Http::withHeaders([
@@ -192,6 +207,12 @@ class UserController extends Controller
 
                 // Simpan metadata file .mind
                 $mindUrl = config('services.supabase.url') . "/storage/v1/object/public/media/{$path}";
+
+                //temukan image target yang sesuai dengan nama file mind
+                $linkedImageTarget = $imageTargets[$mindNameOnly] ?? null;
+                $imageTargetId = $linkedImageTarget['id'] ?? null;
+
+                // Simpan metadata file .mind ke Supabase DB
                 $mindResponse = Http::withHeaders([
                     'apikey'        => config('services.supabase.service_key'),
                     'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
@@ -199,13 +220,16 @@ class UserController extends Controller
                 ])->post(config('services.supabase.url') . '/rest/v1/mind_files', [
                     'id'        => (string) Str::uuid(),
                     'user_id'   => $user_id,
-                    'name'      => $filename,
+                    'name'      => $MindFileName,
                     'mind_url'  => $mindUrl,
+                    'image_target_id' => $imageTargetId, // link ke image target jika ada
                 ]);
+                
 
                 if (!$mindResponse->successful()) {
                     Log::error('Upload mind metadata gagal: '.$mindResponse->body());
                 }
+                
             }
         }
 
@@ -304,9 +328,11 @@ class UserController extends Controller
         }
 
         // 4. Upload gambar baru jika ada
+        $imageTargetsEdit = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $file) {
-                $filename = Str::random(10) . '.' . $file->getClientOriginalExtension();
+                $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+                $filename = now()->format('YmdHis') . '.' . $file->getClientOriginalName();
                 $path = "image_targets/{$id}/{$filename}";
 
                 Http::withHeaders([
@@ -317,24 +343,36 @@ class UserController extends Controller
                     $file->getMimeType()
                 )->put(config('services.supabase.url') . "/storage/v1/object/media/{$path}");
 
+                // Simpan metadata image
+                $imageUrl = config('services.supabase.url') . "/storage/v1/object/public/media/{$path}";
+                $imageId = (string) Str::uuid();
+
                 Http::withHeaders([
                     'apikey'        => config('services.supabase.service_key'),
                     'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
                     'Content-Type'  => 'application/json',
                 ])->post(config('services.supabase.url') . '/rest/v1/image_targets', [
-                    'id'        => (string) Str::uuid(),
+                    'id'        => $imageId,
                     'user_id'   => $id,
                     'name'      => $filename,
-                    'image_url' => config('services.supabase.url') . "/storage/v1/object/public/media/{$path}",
+                    'image_url' => $imageUrl,
                 ]);
+
+                $imageTargetsEdit[$originalName] = [
+                    'id'        => $imageId,
+                    'user_id'   => $id,
+                    'name'      => $filename,
+                    'image_url' => $imageUrl,
+                ];
             }
         }
 
         // ✅ Upload file .mind (bisa banyak)
         if ($request->hasFile('minds')) {
             foreach ($request->file('minds') as $mind) {
-                $filename = Str::random(10) . '.' . $mind->getClientOriginalExtension();
-                $path = "minds/{$id}/{$filename}";
+                $mindNameOnly = pathinfo($mind->getClientOriginalName(), PATHINFO_FILENAME);
+                $MindFileName = now()->format('YmdHis') . '_' . pathinfo($mind->getClientOriginalName(), PATHINFO_FILENAME) . '.' . $mind->getClientOriginalExtension();
+                $path = "minds/{$id}/{$MindFileName}";
 
                 // Upload ke Supabase Storage
                 Http::withHeaders([
@@ -347,6 +385,12 @@ class UserController extends Controller
 
                 // Simpan metadata file .mind
                 $mindUrl = config('services.supabase.url') . "/storage/v1/object/public/media/{$path}";
+
+                //temukan image target yang sesuai dengan nama file mind
+                $linkedImageTarget = $imageTargetsEdit[$mindNameOnly] ?? null;
+                $imageTargetId = $linkedImageTarget['id'] ?? null;
+
+                // Simpan metadata file .mind ke Supabase DB
                 $mindEditResponse = Http::withHeaders([
                     'apikey'        => config('services.supabase.service_key'),
                     'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
@@ -354,8 +398,9 @@ class UserController extends Controller
                 ])->post(config('services.supabase.url') . '/rest/v1/mind_files', [
                     'id'        => (string) Str::uuid(),
                     'user_id'   => $id,
-                    'name'      => $filename,
-                    'mind_url'  => config('services.supabase.url') . "/storage/v1/object/public/media/{$path}",
+                    'name'      => $MindFileName,
+                    'mind_url'  => $mindUrl,
+                    'image_target_id' => $imageTargetId, // link ke image target jika ada
                 ]);
 
                 if (!$mindEditResponse->successful()) {
@@ -370,6 +415,7 @@ class UserController extends Controller
 
     public function destroy($id)
     {
+        //hapus semua image target milik user
         $images = Http::withHeaders([
             'apikey' => config('services.supabase.service_key'),
             'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
@@ -389,6 +435,7 @@ class UserController extends Controller
             ])->delete(config('services.supabase.url') . "/rest/v1/image_targets?id=eq.{$image['id']}");
         }
 
+        //hapus semua mind file milik user
          $minds = Http::withHeaders([
             'apikey' => config('services.supabase.service_key'),
             'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
@@ -405,6 +452,25 @@ class UserController extends Controller
                 'apikey' => config('services.supabase.service_key'),
                 'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
             ])->delete(config('services.supabase.url') . "/rest/v1/mind_files?id=eq.{$mind['id']}");
+        }
+
+        // hapus video yang terkait dengan user
+        $videos = Http::withHeaders([
+            'apikey' => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+        ])->get(config('services.supabase.url') . "/rest/v1/videos?user_id=eq.{$id}&select=*")->json();
+
+        foreach ($videos as $video) {
+            $videoPath = str_replace(config('services.supabase.url') . "/storage/v1/object/public/media/", '', $video['video_url']);
+            Http::withHeaders([
+                'apikey' => config('services.supabase.service_key'),
+                'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+            ])->delete(config('services.supabase.url') . "/storage/v1/object/media/{$videoPath}");
+
+            Http::withHeaders([
+                'apikey' => config('services.supabase.service_key'),
+                'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+            ])->delete(config('services.supabase.url') . "/rest/v1/videos?id=eq.{$video['id']}");
         }
         // Hapus user dari tabel users
         $deleteUser = Http::withHeaders([
