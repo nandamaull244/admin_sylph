@@ -4,6 +4,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TrackingController;
+use App\Http\Controllers\ArtworkController;
 
 
 Route::get('/', [AdminController::class, 'index'])->name('admin.index');
@@ -18,6 +19,11 @@ Route::delete('/mind-files/{id}', [UserController::class, 'deleteMindFile'])->na
 
 // tracking routes
 Route::get('/tracking', [TrackingController::class, 'index'])->name('tracking.index');
+
+
+//artwork routes
+Route::get('/artworks', [ArtworkController::class, 'index'])->name('artwork.index');
+Route::delete('/artworks/{id}', [ArtworkController::class, 'destroy'])->name('artwork.destroy');
 
 
 
