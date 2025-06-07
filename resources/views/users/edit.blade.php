@@ -75,7 +75,7 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label>Tambah File .mind (harus sesuai urutan dan nama dengan gambar)</label>
+                            <label>Tambah File .mind (urutan tidak harus sesuai tetapi nama harus sesuai!!)</label>
                             <div id="mindDropzoneEdit" class="border border-secondary p-3 mb-2 text-center"
                                 style="cursor:pointer;">Drop file .mind di sini atau klik untuk pilih</div>
                             <input type="file" id="mindFileInputEdit" name="minds[]" multiple

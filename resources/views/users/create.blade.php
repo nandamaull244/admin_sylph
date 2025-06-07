@@ -45,7 +45,7 @@
                         <div id="previewContainer" class="d-flex flex-wrap gap-2 mb-3"></div>
                     
                         <div class="mb-3">
-                            <label>Upload File .mind (harus sesuai urutan dan nama dengan gambar)</label>
+                            <label>Upload File .mind (urutan tidak harus sesuai tetapi nama harus sesuai!!)</label>
                             <div id="mindDropzone" class="border border-secondary p-3 mb-2 text-center" style="cursor:pointer;">
                                 Drop file .mind di sini atau klik untuk pilih
                             </div>
