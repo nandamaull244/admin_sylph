@@ -361,8 +361,8 @@ class ComposerStaticInitbfe12996eeecb6fdc8713a9fd9d431f8
         ),
         'Supabase\\' => 
         array (
-            0 => __DIR__ . '/..' . '/supabase/supabase-php/src',
-            1 => __DIR__ . '/..' . '/supabase/gotrue-php/src',
+            0 => __DIR__ . '/..' . '/supabase/gotrue-php/src',
+            1 => __DIR__ . '/..' . '/supabase/supabase-php/src',
         ),
         'StellaMaris\\Clock\\' => 
         array (
@@ -378,13 +378,13 @@ class ComposerStaticInitbfe12996eeecb6fdc8713a9fd9d431f8
         ),
         'Spatie\\LaravelIgnition\\' => 
         array (
-            0 => __DIR__ . '/..' . '/spatie/laravel-ignition/src',
-            1 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/laravel-ignition',
+            0 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/laravel-ignition',
+            1 => __DIR__ . '/..' . '/spatie/laravel-ignition/src',
         ),
         'Spatie\\Ignition\\' => 
         array (
-            0 => __DIR__ . '/..' . '/spatie/ignition/src',
-            1 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/ignition',
+            0 => __DIR__ . '/..' . '/spatie/error-solutions/legacy/ignition',
+            1 => __DIR__ . '/..' . '/spatie/ignition/src',
         ),
         'Spatie\\FlareClient\\' => 
         array (
@@ -668,18 +668,20 @@ class ComposerStaticInitbfe12996eeecb6fdc8713a9fd9d431f8
     );
 
     public static $fallbackDirsPsr0 = array (
-        0 => __DIR__ . '/..' . '/supabase/supabase-php/src',
-        1 => __DIR__ . '/..' . '/supabase/storage-php/src',
+        0 => __DIR__ . '/..' . '/supabase/functions-php/src',
+        1 => __DIR__ . '/..' . '/supabase/gotrue-php/src',
         2 => __DIR__ . '/..' . '/supabase/postgrest-php/src',
-        3 => __DIR__ . '/..' . '/supabase/gotrue-php/src',
-        4 => __DIR__ . '/..' . '/supabase/functions-php/src',
+        3 => __DIR__ . '/..' . '/supabase/storage-php/src',
+        4 => __DIR__ . '/..' . '/supabase/supabase-php/src',
     );
 
     public static $classMap = array (
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
+        'App\\Http\\Controllers\\ARTrackingController' => __DIR__ . '/../..' . '/app/Http/Controllers/ARTrackingController.php',
         'App\\Http\\Controllers\\AdminController' => __DIR__ . '/../..' . '/app/Http/Controllers/AdminController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+        'App\\Http\\Controllers\\TrackingController' => __DIR__ . '/../..' . '/app/Http/Controllers/TrackingController.php',
         'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
         'App\\Http\\Middleware\\Authenticate' => __DIR__ . '/../..' . '/app/Http/Middleware/Authenticate.php',
@@ -6412,7 +6414,7 @@ class ComposerStaticInitbfe12996eeecb6fdc8713a9fd9d431f8
         'Supabase\\Storage\\Util\\StorageUnknownError' => __DIR__ . '/..' . '/supabase/storage-php/src/Util/StorageUnknownError.php',
         'Supabase\\Util\\AuthSessionMissingError' => __DIR__ . '/..' . '/supabase/gotrue-php/src/Util/AuthSessionMissingError.php',
         'Supabase\\Util\\Constants' => __DIR__ . '/..' . '/supabase/gotrue-php/src/Util/Constants.php',
-        'Supabase\\Util\\EnvSetup' => __DIR__ . '/..' . '/supabase/supabase-php/src/Util/EnvSetup.php',
+        'Supabase\\Util\\EnvSetup' => __DIR__ . '/..' . '/supabase/gotrue-php/src/Util/EnvSetup.php',
         'Supabase\\Util\\GoTrueApiError' => __DIR__ . '/..' . '/supabase/gotrue-php/src/Util/GoTrueApiError.php',
         'Supabase\\Util\\GoTrueError' => __DIR__ . '/..' . '/supabase/gotrue-php/src/Util/GoTrueError.php',
         'Supabase\\Util\\GoTrueUnknownError' => __DIR__ . '/..' . '/supabase/gotrue-php/src/Util/GoTrueUnknownError.php',
