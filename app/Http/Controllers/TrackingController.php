@@ -10,7 +10,10 @@ class TrackingController extends Controller
     {   
         $mindUrl = $request->query('mind_url');
         $videoUrl = $request->query('video_url');
+        $width = floatval($request->query('plane_width'));
+        $height = floatval($request->query('plane_height'));
+
         // Logic to display tracking information
-        return view('ar_tracking.index',compact('mindUrl', 'videoUrl'));
+        return view('ar_tracking.index',compact('mindUrl', 'videoUrl','width', 'height'));
     }
 }

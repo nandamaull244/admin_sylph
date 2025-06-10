@@ -150,6 +150,9 @@ class UserController extends Controller
             foreach ($request->file('images') as $file) {
                 $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                 $filename = now()->format('YmdHis') . '.' . $file->getClientOriginalName();
+                list($width, $height) = getimagesize($file);
+                $normalizedWidth = 1.0; // Normalisasi lebar ke 1.0
+                $normalizedHeight = round($height / $width, 2); // Normalisasi tinggi berdasarkan lebar
                 $path = "image_targets/{$user_id}/{$filename}";
 
                 // Upload ke Supabase Storage
@@ -174,6 +177,8 @@ class UserController extends Controller
                     'user_id'   => $user_id,
                     'name'      => $filename,
                     'image_url' => $imageUrl,
+                    'plane_width' => $normalizedWidth,
+                    'plane_height' => $normalizedHeight,
                 ]);
 
                 // Simpan ke array untuk digunakan nanti
@@ -182,6 +187,8 @@ class UserController extends Controller
                     'user_id'   => $user_id,
                     'name'      => $filename,
                     'image_url' => $imageUrl,
+                    'plane_width' => $normalizedWidth,
+                    'plane_height' => $normalizedHeight,
                 ];
             }
         }
@@ -333,6 +340,9 @@ class UserController extends Controller
             foreach ($request->file('images') as $file) {
                 $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                 $filename = now()->format('YmdHis') . '.' . $file->getClientOriginalName();
+                list($width, $height) = getimagesize($file);
+                $normalizedWidth = 1.0; // Normalisasi lebar ke 1.0
+                $normalizedHeight = round($height / $width, 2); // Normalisasi tinggi berdasarkan lebar
                 $path = "image_targets/{$id}/{$filename}";
 
                 Http::withHeaders([
@@ -356,6 +366,8 @@ class UserController extends Controller
                     'user_id'   => $id,
                     'name'      => $filename,
                     'image_url' => $imageUrl,
+                    'plane_width' => $normalizedWidth,
+                    'plane_height' => $normalizedHeight,
                 ]);
 
                 $imageTargetsEdit[$originalName] = [
@@ -363,6 +375,8 @@ class UserController extends Controller
                     'user_id'   => $id,
                     'name'      => $filename,
                     'image_url' => $imageUrl,
+                    'plane_width' => $normalizedWidth,
+                    'plane_height' => $normalizedHeight,
                 ];
             }
         }

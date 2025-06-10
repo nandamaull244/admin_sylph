@@ -47,11 +47,24 @@ class ARTrackingController extends Controller
                 'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
             ])->get(config('services.supabase.url') . "/rest/v1/image_targets?id=eq.{$imageId}&select=image_url")->json();
 
+            //ambil width dan height dari image
+            $widthResponse = Http::withHeaders([
+                'apikey' => config('services.supabase.service_key'),
+                'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+            ])->get(config('services.supabase.url') . "/rest/v1/image_targets?id=eq.{$imageId}&select=plane_width")->json();
+
+            $heightResponse = Http::withHeaders([
+                'apikey' => config('services.supabase.service_key'),
+                'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+            ])->get(config('services.supabase.url') . "/rest/v1/image_targets?id=eq.{$imageId}&select=plane_height")->json();
+
             $results[] = [
                 'title' => $artwork['title'] ?? 'Untitled',
                 'mind_url' => $mindResponse[0]['mind_url'] ?? null,
                 'video_url' => $videoResponse[0]['video_url'] ?? null,
                 'image_url' => $imageResponse[0]['image_url'] ?? null,
+                'plane_width' => $widthResponse[0]['plane_width'] ?? null,
+                'plane_height' => $heightResponse[0]['plane_height'] ?? null,
             ];
         }
 

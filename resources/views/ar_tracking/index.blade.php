@@ -43,8 +43,8 @@
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0" videohandler>
-            <a-plane width="0.75" height="1" scale="1.5 1.5 1" position="0 0 0" material="shader: flat; src: #video">
-            </a-plane>
+            <a-plane width="{{ $width }}" height="{{ $height }}"  position="0 0.18 0" material="shader: flat; src: #video" 
+          rotation="0 0 0"></a-plane>
         </a-entity>
     </a-scene>
 
