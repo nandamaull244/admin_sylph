@@ -79,7 +79,7 @@ class ArtworkController extends Controller
 
             return view('artwork.index'); // pastikan ada view ini
         }
-        public function destroy($id)
+       public function destroy($id)
         {
             // Ambil detail artwork terlebih dahulu
             $artwork = Http::withHeaders([
@@ -91,36 +91,18 @@ class ArtworkController extends Controller
                 return response()->json(['error' => 'Data artwork tidak ditemukan'], 404);
             }
 
-            $artwork = $artwork[0];
+            $artwork = $artwork[0]; // Ambil satu artwork
 
-            // Hapus video di tabel dan storage jika ada video_id
+            // Simpan sementara detail video jika ada
+            $video = null;
             if (!empty($artwork['video_id'])) {
-                // Ambil data video untuk dapatkan nama file di storage
-                $video = Http::withHeaders([
+                $videoResponse = Http::withHeaders([
                     'apikey' => config('services.supabase.service_key'),
                     'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
                 ])->get(config('services.supabase.url') . "/rest/v1/videos?id=eq." . $artwork['video_id'] . "&select=*")->json();
 
-                if (!empty($video)) {
-                    $video = $video[0];
-
-                   // Ekstrak path file dari URL Supabase
-                    $parsedUrl = parse_url($video['video_url']);
-                    $path = $parsedUrl['path'] ?? '';
-                    $filePath = str_replace('/storage/v1/object/public/media/', '', $path);
-
-                    // Hapus file dari Supabase Storage
-                    $response = Http::withHeaders([
-                        'apikey' => config('services.supabase.service_key'),
-                        'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
-                        'Content-Type' => 'application/json',
-                    ])->delete(config('services.supabase.url') . "/storage/v1/object/media/{$filePath}");
-
-                    // Hapus entri video dari tabel videos
-                    Http::withHeaders([
-                        'apikey' => config('services.supabase.service_key'),
-                        'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
-                    ])->delete(config('services.supabase.url') . "/rest/v1/videos?id=eq." . $artwork['video_id']);
+                if (!empty($videoResponse)) {
+                    $video = $videoResponse[0];
                 }
             }
 
@@ -130,8 +112,31 @@ class ArtworkController extends Controller
                 'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
             ])->delete(config('services.supabase.url') . "/rest/v1/artworks?id=eq.$id");
 
+            // Setelah artwork dihapus, lanjut hapus video dan file jika ada
+            if ($video) {
+                // Ekstrak path file dari URL Supabase
+                $parsedUrl = parse_url($video['video_url']);
+                $path = $parsedUrl['path'] ?? '';
+                $filePath = str_replace('/storage/v1/object/public/media/', '', $path);
+
+                // Hapus file dari Supabase Storage
+                $deleteStorage = Http::withHeaders([
+                    'apikey' => config('services.supabase.service_key'),
+                    'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+                ])->delete(config('services.supabase.url') . "/storage/v1/object/media/{$filePath}");
+                if ($deleteStorage->failed()) {
+                    Log::error('Failed to delete video file from storage: ' . $deleteStorage->body());
+                }
+
+                // Hapus entri video dari tabel videos
+                $deleteVideo = Http::withHeaders([
+                    'apikey' => config('services.supabase.service_key'),
+                    'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+                ])->delete(config('services.supabase.url') . "/rest/v1/videos?id=eq." . $video['id']);
+            }
             return redirect()->route('artwork.index')->with('success', 'Artwork dan video terkait berhasil dihapus.');
         }
+
 
 
 }
