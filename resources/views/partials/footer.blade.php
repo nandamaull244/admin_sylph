@@ -1,7 +1,6 @@
 <div class="py-6 px-6 text-center">
-  <p class="mb-0 fs-4">Developed by <a href="https://adminmart.com/" target="_blank"
-      class="pe-1 text-primary text-decoration-underline">Trident Startup</a>Supported by <a href="https://themewagon.com/" target="_blank"
-      class="pe-1 text-primary text-decoration-underline">CV Agenzy Creative</a></p>
+  <p class="mb-0 fs-4">Developed by <a href="https://tridentstartup.com/" target="_blank"
+      class="pe-1 text-primary text-decoration-underline">Trident Startup</a> 2025</p>
 </div>
 <script src="{{ asset ('assets') }}/libs/jquery/dist/jquery.min.js"></script>
   <script src="{{ asset ('assets') }}/libs/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
