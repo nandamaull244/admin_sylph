@@ -204,7 +204,10 @@ body {
   line-height: var(--bs-body-line-height);
   color: var(--bs-body-color);
   text-align: var(--bs-body-text-align);
-  background-color: var(--bs-body-bg);
+  background-image: url('../images/backgrounds/bg_login.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
@@ -16796,7 +16799,10 @@ textarea.form-control-lg {
 }
 .page-wrapper {
   position: relative;
-  background-color: #f6f8fa;
+  background-image: url('../images/backgrounds/bg_login.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .body-wrapper {

@@ -16,7 +16,7 @@
       <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
         <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
           <a href="{{ url('/') }}"
-            class="btn btn-primary me-2"><span class="d-none d-md-block">Admin</span> <span class="d-block d-md-none">Pro</span></a>
+            class="btn btn-primary me-2"><span class="d-none d-md-block">{{ Auth::user()->name }}</span></a>
          
           <li class="nav-item dropdown">
             <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
@@ -27,17 +27,12 @@
               <div class="message-body">
                 <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
                   <i class="ti ti-user fs-6"></i>
-                  <p class="mb-0 fs-3">My Profile</p>
+                  <p class="mb-0 fs-3">{{ Auth::user()->name }}</p>
                 </a>
-                <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                  <i class="ti ti-mail fs-6"></i>
-                  <p class="mb-0 fs-3">My Account</p>
-                </a>
-                <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
-                  <i class="ti ti-list-check fs-6"></i>
-                  <p class="mb-0 fs-3">My Task</p>
-                </a>
-                <a href="./authentication-login.html" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                <form action="{{ route('logout') }}" method="POST">
+                  @csrf
+                  <button type="submit" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</button>
+                </form>
               </div>
             </div>
           </li>
