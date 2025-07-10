@@ -43,3 +43,51 @@
    
 </div>
 @endsection
+@push('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(function () {
+    @if (request()->routeIs('artwork.index'))
+    Swal.fire({
+      title: 'Memuat data...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    @endif
+
+    let table = $('#artwork-table').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{{ route('artwork.index') }}',
+            complete: function () {
+                Swal.close(); // Tutup swal setelah data selesai dimuat
+            },
+            error: function () {
+                Swal.fire('Gagal!', 'Tidak dapat mengambil data artwork.', 'error');
+            }
+        },
+        columns: [
+                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                { data: 'user.email', name: 'user.email' },
+                { data: 'title', name: 'title' },
+                { data: 'image_url', name: 'image_url', orderable: false, searchable: false },
+                { data: 'video_url', name: 'video_url', orderable: false, searchable: false },
+                { data: 'mind_files', name: 'mind_files', orderable: false, searchable: false },
+                { data: 'action', name: 'action', orderable: false, searchable: false },
+            ],
+        language: {
+            emptyTable: "Tidak ada data artwork tersedia."
+        }
+    });
+});
+    // Initialize DataTable index
+    $(document).ready(function() {
+      $('#searchBar').on('keyup', function() {
+        $('#artwork-table').DataTable().search(this.value).draw();
+      });
+    });
+  </script>
+  @endpush

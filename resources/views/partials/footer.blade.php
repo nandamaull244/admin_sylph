@@ -14,15 +14,31 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    $(function () {
+    @if (request()->routeIs('users.index'))
+    Swal.fire({
+      title: 'Memuat data...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+    @endif
 
-  <script>
-    // Initialize DataTable index
-    $(function() {
-        $('#users-table').DataTable({
-            processing: true,
-            serverSide: true,
-            searching: true,
-            ajax: '{{ route('users.index') }}',
+    let table = $('#users-table').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{{ route('users.index') }}',
+            complete: function () {
+                Swal.close(); // Tutup swal setelah data selesai dimuat
+            },
+            error: function () {
+                Swal.fire('Gagal!', 'Tidak dapat mengambil data users.', 'error');
+            }
+        },
             columns: [
                 { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
                 { data: 'name', name: 'name' },
@@ -30,39 +46,16 @@
                 { data: 'image_url', name: 'image_url', orderable: false, searchable: false },
                 { data: 'mind_files', name: 'mind_files', orderable: false, searchable: false },
                 { data: 'action', name: 'action', orderable: false, searchable: false },
-            ]
-        });
+            ],
+        language: {
+            emptyTable: "Tidak ada data users tersedia."
+        }
     });
-
+});
+    // Initialize DataTable index
     $(document).ready(function() {
       $('#searchBar').on('keyup', function() {
         $('#users-table').DataTable().search(this.value).draw();
-      });
-    });
-  </script>
-  <script>
-    // Initialize DataTable index
-    $(function() {
-        $('#artwork-table').DataTable({
-            processing: true,
-            serverSide: true,
-            searching: true,
-            ajax: '{{ route('artwork.index') }}',
-            columns: [
-                { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
-                { data: 'user.email', name: 'user.email' },
-                { data: 'title', name: 'title' },
-                { data: 'image_url', name: 'image_url', orderable: false, searchable: false },
-                { data: 'video_url', name: 'video_url', orderable: false, searchable: false },
-                { data: 'mind_files', name: 'mind_files', orderable: false, searchable: false },
-                { data: 'action', name: 'action', orderable: false, searchable: false },
-            ]
-        });
-    });
-
-    $(document).ready(function() {
-      $('#searchBar').on('keyup', function() {
-        $('#artwork-table').DataTable().search(this.value).draw();
       });
     });
   </script>
@@ -318,10 +311,4 @@
     });
   });
 </script>
-
-
-
-
-
-
-  @stack('scripts')
+@stack('script')

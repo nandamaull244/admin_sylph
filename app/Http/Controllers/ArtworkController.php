@@ -68,7 +68,7 @@ class ArtworkController extends Controller
                         return '<a href="' . $mind[0]['mind_url'] . '" target="_blank">' . $mind[0]['name'] . '</a>';
                     })
                     ->addColumn('action', function ($artwork) {
-                        $delete = '<form action="' . route('artwork.destroy', $artwork['id']) . '" method="POST" style="display:inline-block;">'
+                        $delete = '<form action="' . route('artworks.destroy', $artwork['id']) . '" method="POST" style="display:inline-block;">'
                                 . csrf_field() . method_field('DELETE') .
                                 '<button class="btn btn-danger btn-sm" onclick="return confirm(\'Yakin hapus data ini?\')">Hapus</button></form>';
                         return $delete;

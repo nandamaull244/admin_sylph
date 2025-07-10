@@ -3,7 +3,7 @@
     <div>
         <div class="brand-logo d-flex align-items-center justify-content-between">
             <a href="./index.html" class="text-nowrap logo-img">
-                <img src="{{ asset ('assets') }}/images/logos/logo.svg" alt="" />
+                <img src="{{ asset ('assets') }}/images/logos/sidebar.svg" width="140" />
             </a>
             <div class="close-btn d-xl-none d-block sidebartoggler cursor-pointer" id="sidebarCollapse">
                 <i class="ti ti-x fs-8"></i>
@@ -17,7 +17,7 @@
                     <span class="hide-menu">Beranda</span>
                 </li> 
                 <li class="sidebar-item">
-                    <a class="sidebar-link" href="{{ url('/') }}" aria-expanded="false">
+                    <a class="sidebar-link" href="{{ url('/admin') }}" aria-expanded="false">
                         <span>
                             <iconify-icon icon="solar:home-smile-bold-duotone" class="fs-6"></iconify-icon>
                         </span>
@@ -51,6 +51,22 @@
                           <iconify-icon icon="solar:document-bold" class="fs-6"></iconify-icon>
                       </span>
                       <span class="hide-menu">Compile .mind</span>
+                  </a>
+              </li>
+              <li class="sidebar-item">
+                  <a class="sidebar-link" href="{{ route('harga_artwork.index') }}"  aria-expanded="false">
+                      <span>
+                          <iconify-icon icon="solar:tag-price-bold-duotone" class="fs-6"></iconify-icon>
+                      </span>
+                      <span class="hide-menu">Set harga artwork</span>
+                  </a>
+              </li>
+              <li class="sidebar-item">
+                  <a class="sidebar-link" href="{{ route('produk.index') }}"  aria-expanded="false">
+                      <span>
+                          <iconify-icon icon="solar:box-bold-duotone" class="fs-6"></iconify-icon>
+                      </span>
+                      <span class="hide-menu">Produk</span>
                   </a>
               </li>
               {{-- <li class="sidebar-item">

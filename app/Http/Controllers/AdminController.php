@@ -2,69 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\ImageTarget;
-use Yajra\DataTables\Facades\DataTables;
 use App\Models\Video;
 
 class AdminController extends Controller
 {
-    private function getMediaBucketSize($supabaseUrl, $headers): float
-    {
-        $bucket = 'media';
-        $totalSize = 0;
-
-        // Panggil fungsi rekursif untuk menjelajahi semua folder
-        $totalSize += $this->recursiveSize($supabaseUrl, $headers, $bucket, '');
-
-        return round($totalSize / 1024 / 1024, 2); // Convert ke MB
-    }
-
-    private function recursiveSize($supabaseUrl, $headers, $bucket, $prefix): int
-    {
-        $total = 0;
-
-        $res = Http::withHeaders($headers)->post("$supabaseUrl/storage/v1/object/list/$bucket", [
-            'prefix' => $prefix,
-            'limit' => 1000,
-        ]);
-
-        if (!$res->successful()) return 0;
-
-        $items = $res->json();
-
-        foreach ($items as $item) {
-            if (str_ends_with($item['name'], '/')) {
-                // Ini folder, telusuri isinya lagi
-                $total += $this->recursiveSize($supabaseUrl, $headers, $bucket, $item['name']);
-            } else {
-                // Ini file, ambil size-nya
-                if (isset($item['metadata']['size'])) {
-                    $total += $item['metadata']['size'];
-                }
-            }
-        }
-
-        return $total;
-        dd($items);
-
-    }
     
-
-
-    public function index(){
+    /**
+     * Tampilkan dashboard admin dengan data user, artwork, dan penggunaan storage.
+     */
+    public function index()
+    {
         $supabaseUrl = config('services.supabase.url');
         $supabaseKey = config('services.supabase.service_key');
 
         $headers = [
-            'apiKey' => $supabaseKey,
+            'apikey' => $supabaseKey,
             'Authorization' => 'Bearer ' . $supabaseKey,
         ];
 
+        // Jumlah user
         $userRes = Http::withHeaders($headers)
             ->get($supabaseUrl . '/auth/v1/admin/users');
 
@@ -74,7 +33,7 @@ class AdminController extends Controller
             $userCount = $userData['total'] ?? count($userData['users'] ?? []);
         }
 
-        // Ambil jumlah artwork dari tabel public Supabase
+        // Jumlah artwork
         $artworkRes = Http::withHeaders($headers)
             ->get($supabaseUrl . '/rest/v1/artworks?select=id');
 
@@ -82,14 +41,39 @@ class AdminController extends Controller
         if ($artworkRes->successful()) {
             $artworkCount = count($artworkRes->json());
         }
-        $mediaStorageMb = $this->getMediaBucketSize($supabaseUrl, $headers);
-        dd($mediaStorageMb);
+
+        // Harga artwork
+        $price = 0;
+        $hargaRes = Http::withHeaders($headers)
+            ->get($supabaseUrl . '/rest/v1/harga_artwork?select=price');
+
+        if ($hargaRes->successful()) {
+            $hargaData = $hargaRes->json();
+            if (isset($hargaData[0]['price'])) {
+                $price = $hargaData[0]['price'];
+            }
+        }
+
+        // Kalkulasi pendapatan
+        $totalRevenue = $price * $artworkCount;
+
+        //ambil data image target
+        $imageTargetRes = Http::withHeaders($headers)
+            ->get($supabaseUrl . '/rest/v1/image_targets?select=id');
+
+        $imageTargetCount = 0;
+        if ($imageTargetRes->successful()) {
+            $imageTargetCount = count($imageTargetRes->json());
+        }
+
+
+        // Tampilkan view dengan data yang telah diambil
         return view('home', [
             'userCount' => $userCount,
             'artworkCount' => $artworkCount,
-            'mediaStorageMb' => $mediaStorageMb,
+            'totalRevenue' => $totalRevenue,
+            'imageTargetCount' => $imageTargetCount,
         ]);
-
     }
 
 }
