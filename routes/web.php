@@ -9,8 +9,11 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\HargaArtworkController;
 use App\Http\Controllers\TrafficChartController;
 use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\PageController;
 
 
+// Landing page route
+Route::get('/', [PageController::class, 'index'])->name('landing_page.index');
 //login routes
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login-attempt', [LoginController::class, 'login'])->name('login.attempt');

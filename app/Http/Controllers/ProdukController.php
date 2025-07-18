@@ -65,7 +65,7 @@ class ProdukController extends Controller
         'product_name' => 'required',
         'price' => 'required|numeric',
         'link' => 'required|url',
-        'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
+        'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:10240',
     ]);
 
     $supabaseUrl = config('services.supabase.url');
@@ -102,7 +102,6 @@ class ProdukController extends Controller
             'link'      => $request->link,
             'image_url' => $imageUrl,
         ]);
-
         if ($response->successful()) {
             return redirect()->route('produk.index')->with('success', 'Produk berhasil ditambahkan');
         }
@@ -142,7 +141,7 @@ class ProdukController extends Controller
             'product_name' => 'required',
             'price' => 'required|numeric',
             'link' => 'required|url',
-            'image_edit' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'image_edit' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
         ]);
 
         $supabaseUrl = config('services.supabase.url');
