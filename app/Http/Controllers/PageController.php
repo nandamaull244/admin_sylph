@@ -25,4 +25,8 @@ class PageController extends Controller
 
         return view('landing_page.index', compact('bannerData'));
     }
+    public function privacyPolicy()
+    {
+        return view('landing_page.privacy');
+    }
 }

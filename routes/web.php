@@ -14,6 +14,7 @@ use App\Http\Controllers\PageController;
 
 // Landing page route
 Route::get('/', [PageController::class, 'index'])->name('landing_page.index');
+Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('landing_page.privacy');
 //login routes
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login-attempt', [LoginController::class, 'login'])->name('login.attempt');

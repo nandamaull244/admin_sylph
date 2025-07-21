@@ -345,16 +345,16 @@
                         <h5>About Us</h5>
                         <ul class="menu-list">
                             <li class="menu-item">
-                                <a href="#">vision</a>
+                                <a href="https://www.instagram.com/sylph.art.id/">Instagram</a>
                             </li>
                             <li class="menu-item">
-                                <a href="#">articles </a>
+                                <a href="https://www.tiktok.com/@sylph.art">TikTok</a>
                             </li>
                             <li class="menu-item">
-                                <a href="#">careers</a>
+                                <a href="mailto:sylphart14@gmail.com">Email</a>
                             </li>
                             <li class="menu-item">
-                                <a href="#">service terms</a>
+                                <a href="{{ route('landing_page.privacy') }}">Privacy Policy</a>
                             </li>
                         </ul>
                     </div>
@@ -412,43 +412,8 @@
     <div id="footer-bottom">
         <div class="container">
             <div class="row">
-                <div class="col-md-12">
-
-                    <div class="copyright">
-                        <div class="row">
-
-                            <div class="col-md-6">
-                                <p>© 2025 All rights reserved. Sylph Art</p>
-                            </div>
-
-                            <div class="col-md-6">
-                                <div class="social-links align-right">
-                                    <ul>
-                                        <li>
-                                            <a href="https://instagram.com/sylph.ar" target="_blank"
-                                                aria-label="Instagram">
-                                                <i class="icon icon-instagram"></i>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="https://www.tiktok.com/@sylph.ar" target="_blank"
-                                                aria-label="TikTok">
-                                                <i class="icon icon-tiktok"></i>
-                                            </a>
-                                        </li>
-                                        <li>
-                                            <a href="https://wa.me/6281234567890" target="_blank" aria-label="WhatsApp">
-                                                <i class="icon icon-whatsapp"></i>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                    <!--grid-->
-
+                <div class="col-md-12 text-center">
+                    <p>&copy; 2024 Sylph Art. All rights reserved.</p>
                 </div>
                 <!--footer-bottom-content-->
             </div>
