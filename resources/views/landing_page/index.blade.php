@@ -19,6 +19,8 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('landing') }}/icomoon/icomoon.css">
     <link rel="stylesheet" type="text/css" href="{{ asset('landing') }}/css/vendor.css">
     <link rel="stylesheet" type="text/css" href="{{ asset('landing') }}/style.css">
+    <link rel="shortcut icon" type="image/png" href="{{ asset ('landing') }}/images/sylph/logo.svg" />
+
 
 </head>
 
@@ -135,15 +137,15 @@
                 <div class="col-md-12">
                     <div class="banner-slider pattern-overlay">
                         <div class="slider-item">
-                            <img src="{{ asset('landing') }}/images/sylph/landscape1.jpg" alt="banner"
+                            <img src="{{ asset('landing') }}/images/sylph/landscape1.png" alt="banner"
                                 class="banner-image">
                         </div>
                         <div class="slider-item">
-                            <img src="{{ asset('landing') }}/images/sylph/landscape2.jpg" alt="banner"
+                            <img src="{{ asset('landing') }}/images/sylph/landscape2.png" alt="banner"
                                 class="banner-image">
                         </div>
                         <div class="slider-item">
-                            <img src="{{ asset('landing') }}/images/sylph/landscape3.jpg" alt="banner"
+                            <img src="{{ asset('landing') }}/images/sylph/landscape3.png" alt="banner"
                                 class="banner-image">
                         </div>
                     </div>
@@ -212,6 +214,25 @@
                     <div class="ar-slider pattern-overlay">
                         <div class="slider-item">
                             <div class="banner-content">
+                                <h2 class="banner-title">Tutorial: How to Use the Sylph AR App</h2>
+                                <p>
+                                    Learn how to transform your memories using Sylph AR. This tutorial guides you
+                                    step-by-step on scanning your frame and linking it with a video — so your moments
+                                    come alive through augmented reality.
+                                </p>
+
+                            </div>
+                            <div class="video-thumbnail-wrapper" style="position: relative; cursor: pointer;"
+                                data-bs-toggle="modal" data-bs-target="#sylphArModal">
+                                <img src="{{ asset('landing') }}/images/sylph/thumbnail.jpg"
+                                    alt="Sylph AR Tutorial" class="ar-image"
+                                    style="width: 385px;height: 572px; border-radius: 50px;">
+                                <img src="{{ asset('landing') }}/images/sylph/play.png" alt="Play"
+                                    style="position: absolute; top: 50%; left: 50%; width: 60px; transform: translate(-50%, -50%); opacity: 0.85;">
+                            </div>
+                        </div>
+                        <div class="slider-item">
+                            <div class="banner-content">
                                 <h2 class="banner-title">Sylph AR Memories Come to Life</h2>
                                 <p>
                                     Sylph AR is an augmented reality app that brings your memories to life through
@@ -230,25 +251,6 @@
                         </div>
                         <!--slider-item-->
 
-                        <div class="slider-item">
-                            <div class="banner-content">
-                                <h2 class="banner-title">Tutorial: How to Use the Sylph AR App</h2>
-                                <p>
-                                    Learn how to transform your memories using Sylph AR. This tutorial guides you
-                                    step-by-step on scanning your frame and linking it with a video — so your moments
-                                    come alive through augmented reality.
-                                </p>
-
-                            </div>
-                            <div class="video-thumbnail-wrapper" style="position: relative; cursor: pointer;"
-                                data-bs-toggle="modal" data-bs-target="#sylphArModal">
-                                <img src="{{ asset('landing') }}/images/sylph/thumbnail.jpg"
-                                    alt="Sylph AR Tutorial" class="ar-image"
-                                    style="width: 385px;height: 572px; border-radius: 50px;">
-                                <img src="{{ asset('landing') }}/images/sylph/play.png" alt="Play"
-                                    style="position: absolute; top: 50%; left: 50%; width: 60px; transform: translate(-50%, -50%); opacity: 0.85;">
-                            </div>
-                        </div>
 
                         <!--slider-item-->
 
