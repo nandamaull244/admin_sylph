@@ -20,6 +20,10 @@ Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login-attempt', [LoginController::class, 'login'])->name('login.attempt');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+Route::get('/envelope-sender', [PageController::class, 'envelopeSender'])->name('envelope.sender');
+Route::get('/envelope-reciper', [PageController::class, 'envelopeReciper'])->name('envelope.reciper');
+
+
 Route::middleware(['auth:web'])->group(function () {
     // Protected routes that require authentication
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
