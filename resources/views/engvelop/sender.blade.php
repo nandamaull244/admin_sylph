@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valentine Letter</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Sylph Letter</title>
     <link rel="icon" href="{{ asset('assets') }}/images/envelope/pavicon.png" type="image/x-icon" width="146" height="146">
     {{-- <link rel="stylesheet" href="css/index.css"> --}}
     <style>
@@ -201,6 +202,7 @@
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     {{-- <script src="js/index.js"></script> --}}
     <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -247,16 +249,67 @@
                     alert("Lengkapi semua kolom terlebih dahulu.");
                     return;
                 }
+                let fullUrl = "";
+                const formData = new FormData();
+                formData.append('pengirim', pengirim);
+                formData.append('penerima', penerima);
+                formData.append('body', body);
 
-                const json = JSON.stringify({ pengirim, penerima, body });
-                const encoded = encodeURIComponent(json);
-                const fullUrl = `{{ url('/envelope-reciper') }}?data=${encoded}`;
+                fetch("{{ url('/envelope-store') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(response => {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Surat berhasil dikirim!',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
 
-                currentPenerima = penerima;
+                        console.log("Response Data:", response);
+                        
+                        fullUrl = `{{ url('/envelope-reciper') }}?data=${encodeURIComponent(response.data)}`;
+                        // Bisa diarahkan ke fullUrl jika perlu:
+                        // window.location.href = fullUrl;
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal mengirim surat.',
+                            text: 'Silakan coba lagi.',
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Terjadi kesalahan',
+                        text: 'Silakan coba lagi.',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                });
+
+
+                // const json = JSON.stringify({ pengirim, penerima, body });
+                // const encoded = encodeURIComponent(json);
+                // const fullUrl = `{{ url('/envelope-reciper') }}?data=${encoded}`;
+
+                // currentPenerima = penerima;
                 qrContainer.innerHTML = "";
                 qrDownload.innerHTML = "";
 
                 showModal();
+                console.log("QR Code URL:", fullUrl);
+                
 
                 setTimeout(() => {
                     new QRCode(qrContainer, {

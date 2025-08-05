@@ -10,19 +10,22 @@ use App\Http\Controllers\HargaArtworkController;
 use App\Http\Controllers\TrafficChartController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\EnvelopeController;
 
 
 // Landing page route
 Route::get('/', [PageController::class, 'index'])->name('landing_page.index');
 Route::get('/privacy-policy', [PageController::class, 'privacyPolicy'])->name('landing_page.privacy');
+Route::get('/not-found', [PageController::class, 'blank'])->name('landing_page.blank');
 //login routes
 Route::get('/login', [LoginController::class, 'index'])->name('login');
 Route::post('/login-attempt', [LoginController::class, 'login'])->name('login.attempt');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-Route::get('/envelope-sender', [PageController::class, 'envelopeSender'])->name('envelope.sender');
-Route::get('/envelope-reciper', [PageController::class, 'envelopeReciper'])->name('envelope.reciper');
-
+Route::get('/envelope-sender', [EnvelopeController::class, 'envelopeSender'])->name('envelope.sender');
+Route::get('/envelope-reciper', [EnvelopeController::class, 'envelopeReciper'])->name('envelope.reciper');
+Route::post('/envelope-store', [EnvelopeController::class, 'envelopeStore'])->name('envelope.store');
+Route::get('/envelope/get/{hashId}', [EnvelopeController::class, 'getEnvelopeByHashId'])->name('envelope.getByHashId');
 
 Route::middleware(['auth:web'])->group(function () {
     // Protected routes that require authentication

@@ -29,14 +29,10 @@ class PageController extends Controller
     {
         return view('landing_page.privacy');
     }
-
-    public function envelopeSender()
+    public function blank()
     {
-        return view('engvelop.sender');
+        return view('engvelop.404');
     }
 
-    public function envelopeReciper()
-    {
-        return view('engvelop.reciever');
-    }
+
 }
