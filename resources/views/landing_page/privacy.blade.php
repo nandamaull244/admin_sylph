@@ -19,6 +19,8 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('landing') }}/icomoon/icomoon.css">
     <link rel="stylesheet" type="text/css" href="{{ asset('landing') }}/css/vendor.css">
     <link rel="stylesheet" type="text/css" href="{{ asset('landing') }}/style.css">
+    <link rel="shortcut icon" type="image/png" href="{{ asset ('landing') }}/images/sylph/logo.svg" />
+
 
 </head>
 
