@@ -472,9 +472,6 @@
                     <div class="image-envelope">
                         <img src="{{ asset('assets') }}/images/envelope/logo.png" alt="Envelope" class="envelope-image" width="44" height="9">
                     </div>
-                    <div class="button-container">
-                        <button class="redirect-button" onclick="redirectToDrive()">Continue</button>
-                    </div>
                     
                 </div>
                
