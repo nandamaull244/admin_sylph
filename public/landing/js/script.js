@@ -39,6 +39,17 @@ navLinks.forEach(link => {
 });
 
 
+  const toProduct = document.querySelector('#button-product');
+  toProduct.addEventListener('click', function (e) {
+    e.preventDefault();
+    const target = document.querySelector('#our-art');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth' });
+      history.replaceState(null, '', window.location.pathname); // hapus # dari URL
+    }
+  });
+
+
   // Sticky header on scroll
   const initScrollNav = function () {
     var scroll = $(window).scrollTop();

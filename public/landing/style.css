@@ -1462,6 +1462,15 @@ button {
   text-transform: capitalize;
 }
 
+@media screen and (max-width: 1000px) {
+  .btn-wrap {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+  
+}
+
 .btn-wrap a {
   text-decoration: none;
   font-weight: 600;
@@ -1848,7 +1857,7 @@ img.post-image {
 }
 
 .banner-content h2.banner-title {
-  font-size: 4.5em;
+  font-size: 4em;
   font-weight: 500;
   color: #222;
 }
@@ -1960,7 +1969,7 @@ img.post-image {
 }
 
 .banner-content h2.banner-title {
-  font-size: 4em;
+  font-size: 3.5em;
   font-weight: 500;
   color: #222;
 }
@@ -2385,12 +2394,12 @@ span.prev-price {
     z-index: 0;
 }*/
 #download-app .app-info {
-  padding-top: 100px;
+  padding-top: 20px;
   margin-left: 50px;
 }
 
 #download-app .app-info p {
-  margin-bottom: 50px;
+  margin-bottom: 20px;
 }
 
 @media screen and (max-width: 820px) {

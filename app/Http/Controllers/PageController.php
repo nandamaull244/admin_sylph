@@ -29,4 +29,10 @@ class PageController extends Controller
     {
         return view('landing_page.privacy');
     }
+    public function blank()
+    {
+        return view('engvelop.404');
+    }
+
+
 }

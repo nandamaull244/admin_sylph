@@ -45,7 +45,8 @@
                             <div class="main-menu stellarnav">
                                 <ul class="menu-list">
                                     <li class="menu-item"><a href="#billboard">Home</a></li>
-                                    <li class="menu-item"><a href="#our-art" class="nav-link">Our Arts</a></li>
+                                    <li class="menu-item"><a href="#our-art" class="nav-link">Cute gifts</a></li>
+                                    <li class="menu-item"><a href="#how-to-order" class="nav-link">How to order</a></li>
                                     <li class="menu-item"><a href="#AR" class="nav-link">Sylph AR</a></li>
                                     <li class="menu-item"><a href="#download-app" class="nav-link">Download App</a></li>
                                 </ul>
@@ -74,25 +75,18 @@
             <div class="row">
                 <div class="col-md-12">
 
-                    <button class="prev slick-arrow">
-                        <i class="icon icon-arrow-left"></i>
-                    </button>
-
-                    <div class="main-slider pattern-overlay">
+                    <div class="main-slider pattern-overlay" data-aos="fade-up">
                         <div class="slider-item">
                             <div class="banner-content">
-                                <h2 class="banner-title">Memories are Art</h2>
-                                <p>Every memory holds a piece of who we are laugh, a glance, a moment frozen in time.
-                                    At Sylph AR, we believe memories aren’t just meant to be stored — they’re meant to
-                                    be experienced.
-                                    Using the magic of augmented reality, we transform your most treasured moments into
-                                    living works of art.
-                                    Let your memories breathe, move, and shine not just in your heart, but in the world
-                                    around you.</p>
-                                <div class="btn-wrap">
-                                    <a href="https://shopee.co.id/sylph.art?entryPoint=ShopBySearch&searchKeyword=sylph%20art"
-                                        target="_blank" class="btn btn-outline-accent btn-accent-arrow">Read More<i
-                                            class="icon icon-ns-arrow-right"></i></a>
+                                <h2 class="banner-title">Love Gifts that Come to Life</h2>
+                                <p>Sylph AR brings your memories to life.
+                                    From animated frames, QR-coded love notes, to magical keychains
+                                    our AR-powered gifts are made to move hearts and make moments last forever.</p>
+                                <div class="btn-wrap d-flex gap-2">
+                                    <a href="#our-art"
+                                       id="button-product" class="btn btn-outline-accent btn-accent-arrow">Product</a>
+                                    <a href="{{ route('envelope.sender') }}"
+                                        target="_blank" class="btn btn-outline-accent btn-accent-arrow">Try QR envelope</a>
                                 </div>
                             </div>
                             <!--banner-content-->
@@ -101,29 +95,8 @@
                         </div>
                         <!--slider-item-->
 
-                        <div class="slider-item">
-                            <div class="banner-content">
-                                <h2 class="banner-title">Your Moments, Reimagined</h2>
-                                <p>Sylph AR lets you relive your most meaningful memories through stunning AR visuals —
-                                    turning real emotions into interactive art pieces that stay with you forever.</p>
-                                <div class="btn-wrap">
-                                    <a href="https://shopee.co.id/sylph.art?entryPoint=ShopBySearch&searchKeyword=sylph%20art"
-                                        target="_blank" class="btn btn-outline-accent btn-accent-arrow">Read More<i
-                                            class="icon icon-ns-arrow-right"></i></a>
-                                </div>
-                            </div>
-                            <!--banner-content-->
-                            <img src="{{ asset('landing') }}/images/sylph/sylph1.png" alt="banner"
-                                class="banner-image">
-                        </div>
-                        <!--slider-item-->
-
                     </div>
                     <!--slider-->
-
-                    <button class="next slick-arrow">
-                        <i class="icon icon-arrow-right"></i>
-                    </button>
 
                 </div>
             </div>
@@ -135,7 +108,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
-                    <div class="banner-slider pattern-overlay">
+                    <div class="banner-slider pattern-overlay" data-aos="fade-up">
                         <div class="slider-item">
                             <img src="{{ asset('landing') }}/images/sylph/landscape1.png" alt="banner"
                                 class="banner-image">
@@ -154,6 +127,23 @@
             </div>
         </div>
     </section>
+    <section id="quotation" class="align-center pb-5 mb-5">
+		<div class="inner-content" data-aos="fade-up">
+			<h2 class="section-title divider">Send a Love Letter in a Digital Envelope</h2>
+                <br>
+                <div class="container justify-content-center">
+
+                    <p>Just write the sender’s name, the receiver’s name, and your heartfelt message
+                        and we’ll turn it into a unique QR code you can attach to your gift.
+                        When scanned, it reveals your special message, making your gift unforgettable.</p>
+                </div>
+				<div class="author-name">
+                    <a href="{{ route('envelope.sender') }}"
+                    target="_blank" class="btn btn-outline-accent btn-accent-arrow">Try QR Love Envelope</a>
+                </div>
+
+		</div>
+	</section>
 
     <section id="our-art" class="bookshelf py-5 my-5">
         <div class="container">
@@ -164,7 +154,7 @@
                         <div class="title">
                             <span>Make It Yours</span>
                         </div>
-                        <h2 class="section-title">Art Collection</h2>
+                        <h2 class="section-title">Cute & Custom Gifts</h2>
                     </div>
                     <div class="row">
                         @foreach($bannerData as $item)
@@ -195,6 +185,41 @@
                 </div>
                 <!--inner-tabs-->
 
+            </div>
+        </div>
+    </section>
+    <section id="how-to-order" class="leaf-pattern-overlay" style="background:none!important;">
+        <div class="corner-pattern-overlay"></div>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="row">
+
+                        <div class="col-md-5">
+                            <figure>
+                                <img src="{{ asset('landing') }}/images/shopee_image.png" alt="phone"
+                                    class="single-image">
+                            </figure>
+                        </div>
+
+                        <div class="col-md-7">
+                            <div class="app-info">
+                                <h2 class="section-title divider">How to Order</h2>
+                                <ul style="list-style-type: none;">
+                                    <strong>1.Choose a product</strong>
+                                    <li>Click "ORDER" or visit our <a href="https://s.shopee.co.id/zxQvHmoZ?share_channel_code=1" target="_blank">Shopee Store</a></li>
+                                    <strong>2.Send Your Photo to Sylph</strong>
+                                    <li>After ordering, send the photo you want in the frame or gift</li>
+                                    <strong>3.Add Your AR Video</strong>
+                                    <li>Send your video, or let us create one for you!</li>
+                                    <strong>4.Access the AR App</strong>
+                                    <li>We’ll create an account for you to log in and view your gift in AR.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
     </section>
