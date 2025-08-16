@@ -499,7 +499,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const hash_id = urlParams.get('data');
             if(!hash_id) {
-                window.location.href = '{{ url('/not-found') }}';
+                window.location.href = "{{ url('/not-found') }}";
             }
             
             const envelope = document.querySelector('.envelope-wrapper');
@@ -521,7 +521,7 @@
             document.addEventListener('DOMContentLoaded', function () {
                 const audio = document.getElementById('bgm');
                 const currentPage = window.location.pathname; 
-                const desiredPage = "https://rhyneeai.github.io/letter-envelope/envelope.html"; 
+                const desiredPage = "{{ url('/envelope-sender') }}"; 
                 if (currentPage === desiredPage) {
                     audio.play().catch((error) => {
                         console.log('Audio playback failed. User interaction might be required.', error);
