@@ -201,7 +201,7 @@
             <button id="close-btn">Close</button>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="{{ asset('assets') }}/js/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     {{-- <script src="js/index.js"></script> --}}
     <script>
@@ -249,7 +249,7 @@
                     alert("Lengkapi semua kolom terlebih dahulu.");
                     return;
                 }
-                let fullUrl = "";
+                var fullUrl = "";
                 const formData = new FormData();
                 formData.append('pengirim', pengirim);
                 formData.append('penerima', penerima);
@@ -308,7 +308,9 @@
                 qrDownload.innerHTML = "";
 
                 showModal();
-                console.log("QR Code URL:", fullUrl);
+                setTimeout(() => {
+                    console.log("QR Code URL:", fullUrl);
+                }, 299);
                 
 
                 setTimeout(() => {
