@@ -520,9 +520,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const hash_id = urlParams.get('data');
-            // if(!hash_id) {
-            //     window.location.href = "{{ url('/not-found') }}";
-            // }
+            if(!hash_id) {
+                window.location.href = "{{ url('/not-found') }}";
+            }
             
             const envelope = document.querySelector('.envelope-wrapper');
             const heart = document.querySelector('.heart');
@@ -560,69 +560,69 @@
                 const computedTransform = window.getComputedStyle(heart).transform;
 
                 let letterData = '';
-                // if (hash_id) {
-                //     try {
-                //         fetch(`{{ url('/envelope/get') }}/${hash_id}`, {
-                //             method: 'GET'
-                //         })
-                //         .then(response => response.json())
-                //         .then(response => {
-                //             if (response.success) {
-                //                 console.log("Response:", response.data);
-                //                 letterData = response.data;
-                //             } else {
-                //                 Swal.fire({
-                //                     icon: 'error',
-                //                     title: 'Gagal mengirim surat.',
-                //                     text: 'Silakan coba lagi.',
-                //                     showConfirmButton: false,
-                //                     timer: 1500
-                //                 });
-                //             }
-                //         })
-                //         .catch(error => {
-                //             console.error("Error:", error);
-                //             Swal.fire({
-                //                 icon: 'error',
-                //                 title: 'Terjadi kesalahan',
-                //                 text: 'Silakan coba lagi.',
-                //                 showConfirmButton: false,
-                //                 timer: 1500
-                //             });
-                //         });
+                if (hash_id) {
+                    try {
+                        fetch(`{{ url('/envelope/get') }}/${hash_id}`, {
+                            method: 'GET'
+                        })
+                        .then(response => response.json())
+                        .then(response => {
+                            if (response.success) {
+                                console.log("Response:", response.data);
+                                letterData = response.data;
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal mengirim surat.',
+                                    text: 'Silakan coba lagi.',
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Terjadi kesalahan',
+                                text: 'Silakan coba lagi.',
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+                        });
 
-                //         setTimeout(() => {
-                //             console.log("Letter Data:", letterData);
+                        setTimeout(() => {
+                            console.log("Letter Data:", letterData);
                             
-                //             document.getElementById("dear").textContent = `Dear ${letterData.penerima}`;
-                //             document.getElementById("letter-body").textContent = letterData.body;
-                //             document.getElementById("sincerely").textContent = `Sincerely, ${letterData.pengirim}`;
+                            document.getElementById("dear").textContent = `Dear ${letterData.penerima}`;
+                            document.getElementById("letter-body").textContent = letterData.body;
+                            document.getElementById("sincerely").textContent = `Sincerely, ${letterData.pengirim}`;
                 
-                //             const typingEffect = document.querySelector('.typing-effect');
-                //             const nameText = `    My Beloved, ${letterData.penerima} 💖`;
+                            const typingEffect = document.querySelector('.typing-effect');
+                            const nameText = `    My Beloved, ${letterData.penerima} 💖`;
                 
-                //             typingEffect.textContent = nameText;
+                            typingEffect.textContent = nameText;
                 
-                //             const canvas = document.createElement('canvas');
-                //             const context = canvas.getContext('2d');
+                            const canvas = document.createElement('canvas');
+                            const context = canvas.getContext('2d');
                 
-                //             const computedStyle = window.getComputedStyle(typingEffect);
-                //             const font = `${computedStyle.fontSize} ${computedStyle.fontFamily}`;
-                //             context.font = font;
-                //             const textWidth = context.measureText(nameText).width;
+                            const computedStyle = window.getComputedStyle(typingEffect);
+                            const font = `${computedStyle.fontSize} ${computedStyle.fontFamily}`;
+                            context.font = font;
+                            const textWidth = context.measureText(nameText).width;
                 
-                //             typingEffect.style.maxWidth = `${textWidth - 10}px`;
-                //             typingEffect.style.animation = 'none'; 
-                //             void typingEffect.offsetWidth;
-                //             typingEffect.style.animation = `typing 5s steps(${Math.ceil(textWidth / 10)}, end) forwards, blinkCursor 0.5s step-end infinite`;
-                //         }, 500);
-                //     } catch (err) {
-                //         console.error("Failed to parse data:", err);
-                //         // window.location.href = 'index.html';
-                //     }
-                // } else {
-                //     // window.location.href = 'index.html';
-                // }
+                            typingEffect.style.maxWidth = `${textWidth - 10}px`;
+                            typingEffect.style.animation = 'none'; 
+                            void typingEffect.offsetWidth;
+                            typingEffect.style.animation = `typing 5s steps(${Math.ceil(textWidth / 10)}, end) forwards, blinkCursor 0.5s step-end infinite`;
+                        }, 500);
+                    } catch (err) {
+                        console.error("Failed to parse data:", err);
+                        // window.location.href = 'index.html';
+                    }
+                } else {
+                    // window.location.href = 'index.html';
+                }
             
             
                 const audio = document.getElementById('bgm');

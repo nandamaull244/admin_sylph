@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Envelope;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class EnvelopeController extends Controller
 {
@@ -18,6 +18,7 @@ class EnvelopeController extends Controller
     {
         return view('engvelop.reciever');
     }
+
     public function envelopeStore(Request $request)
     {
         $request->validate([
@@ -25,7 +26,8 @@ class EnvelopeController extends Controller
             'penerima' => 'required|string|max:255',
             'body' => 'required|string',
         ]);
-        $hashId = bcrypt($request->input('pengirim'));
+
+        $hashId = md5($request->pengirim . now());
 
         $data = Envelope::create([
             'hash_id' => $hashId,
@@ -38,14 +40,15 @@ class EnvelopeController extends Controller
             return response()->json([
                 'message' => 'Failed to create envelope.',
             ], 500);
-        } else {
-            return response()->json([
-                'message' => 'Envelope created successfully',
-                'data' => $hashId,
-                'success' => true,
-            ], 200);
         }
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'hash_id' => $hashId
+            ]
+        ], 200);
     }
+
     public function getEnvelopeByHashId($hashId)
     {
         $envelope = Envelope::where('hash_id', $hashId)->first();

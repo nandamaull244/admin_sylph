@@ -26,6 +26,8 @@ Route::get('/envelope-sender', [EnvelopeController::class, 'envelopeSender'])->n
 Route::get('/envelope-reciper', [EnvelopeController::class, 'envelopeReciper'])->name('envelope.reciper');
 Route::post('/envelope-store', [EnvelopeController::class, 'envelopeStore'])->name('envelope.store');
 Route::get('/envelope/get/{hashId}', [EnvelopeController::class, 'getEnvelopeByHashId'])->name('envelope.getByHashId');
+Route::get('/envelope/qr/{hashId}', [EnvelopeController::class, 'generateQr']);
+
 
 Route::middleware(['auth:web'])->group(function () {
     // Protected routes that require authentication
