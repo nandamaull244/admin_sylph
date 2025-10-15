@@ -329,7 +329,7 @@
                                     Download now and see how every smile, every hug, and every place you’ve been can
                                     come alive right before your eyes.</p>
                                 <div class="google-app">
-                                    <a href="https://play.google.com/store/apps/details?id=com.sylph.ar"
+                                    <a href="https://drive.google.com/file/d/1ClzyOR_9jfBxK7odb2qNdc7De3FRyj8v/view?usp=drive_link"
                                         target="_blank">
                                         <img src="{{ asset('landing') }}/images/google-play.jpg"
                                             alt="google play">

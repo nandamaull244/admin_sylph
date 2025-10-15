@@ -304,7 +304,7 @@
             .one:after, .two:after, .three:after, .four:after, .five:after, .six:after {
                 top: 0;
                 left: 5px;
-            }
+            } 
 
             .one {
                 left: 20px;

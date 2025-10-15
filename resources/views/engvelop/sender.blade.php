@@ -191,7 +191,7 @@
             <button type="button" id="submit-btn">Send Letter ❤️</button>
         </form>
     </div>
-
+ 
     <div id="qrModal">
         <div class="modal-content">
             <h3>Scan this QR Code</h3>
