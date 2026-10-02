@@ -8,11 +8,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Log;
-use App\Models\User;
+use App\Models\Users;
 use Carbon\Carbon;
 
 Carbon::setLocale('id');
-use App\Models\ImageTarget;
 
 class UserController extends Controller
 {
@@ -297,15 +296,20 @@ class UserController extends Controller
         }
 
         // 2. Update tabel users
+        $userUpdatePayload = [
+            'name'  => $request->name,
+            'email' => $request->email,
+        ];
+
+        if ($request->filled('password')) {
+            $userUpdatePayload['password'] = $request->password;
+        }
+
         $updateUser = Http::withHeaders([
             'apikey'        => config('services.supabase.service_key'),
             'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
             'Content-Type'  => 'application/json',
-        ])->patch(config('services.supabase.url') . "/rest/v1/users?id=eq.{$id}", [
-            'name'  => $request->name,
-            'email' => $request->email,
-            'password' => $request->password,
-        ]);
+        ])->patch(config('services.supabase.url') . "/rest/v1/users?id=eq.{$id}", $userUpdatePayload);
 
         if ($updateUser->failed()) {
             return back()->withErrors(['error' => 'Gagal update data user: ' . $updateUser->body()]);
@@ -429,7 +433,13 @@ class UserController extends Controller
 
     public function destroy($id)
     {
-        //hapus semua image target milik user
+        // 1. Hapus semua artworks milik user terlebih dahulu untuk mencegah foreign key violation
+        Http::withHeaders([
+            'apikey' => config('services.supabase.service_key'),
+            'Authorization' => 'Bearer ' . config('services.supabase.service_key'),
+        ])->delete(config('services.supabase.url') . "/rest/v1/artworks?user_id=eq.{$id}");
+
+        // 2. Hapus semua image target milik user
         $images = Http::withHeaders([
             'apikey' => config('services.supabase.service_key'),
             'Authorization' => 'Bearer ' . config('services.supabase.service_key'),

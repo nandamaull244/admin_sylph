@@ -65,4 +65,19 @@ class EnvelopeController extends Controller
             'success' => true,
         ], 200);
     }
+
+    public function generateQr($hashId)
+    {
+        $targetUrl = route('envelope.reciper') . '?hash=' . $hashId;
+
+        $qrCode = QrCode::create($targetUrl)
+            ->setSize(300)
+            ->setMargin(10);
+
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+
+        return response($result->getString(), 200)
+            ->header('Content-Type', $result->getMimeType());
+    }
 }
