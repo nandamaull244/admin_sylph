@@ -28,7 +28,6 @@
         }
 
         #guideBox {
-            display: none;
             position: fixed;
             top: 24px;
             left: 50%;
@@ -49,7 +48,6 @@
         }
 
         #soundToggle {
-            display: none;
             position: fixed;
             bottom: 24px;
             right: 24px;
@@ -60,6 +58,7 @@
             border-radius: 50%;
             width: 50px;
             height: 50px;
+            display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
@@ -74,7 +73,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(18, 18, 20, 0.94);
+            background: rgba(18, 18, 20, 0.95);
             color: white;
             z-index: 10000;
             flex-direction: column;
@@ -112,6 +111,35 @@
             color: #ff5252;
         }
     </style>
+
+    <script>
+        // Register videohandler in <head> BEFORE <a-scene> is parsed
+        AFRAME.registerComponent('videohandler', {
+            init: function () {
+                const video = document.querySelector("#video");
+                const guideBox = document.querySelector("#guideBox");
+                this.el.addEventListener("targetFound", () => {
+                    console.log("Target Found! Playing AR video.");
+                    if (guideBox) guideBox.style.display = "none";
+                    if (video) {
+                        const playPromise = video.play();
+                        if (playPromise !== undefined) {
+                            playPromise.catch(error => {
+                                console.warn("Autoplay prevented, fallback to muted:", error);
+                                video.muted = true;
+                                video.play();
+                            });
+                        }
+                    }
+                });
+                this.el.addEventListener("targetLost", () => {
+                    console.log("Target Lost.");
+                    if (guideBox) guideBox.style.display = "block";
+                    if (video) video.pause();
+                });
+            }
+        });
+    </script>
 </head>
 
 <body>
@@ -142,13 +170,19 @@
 
     <script>
         function showError(title, message) {
-            document.getElementById('errorTitle').innerText = title;
-            document.getElementById('errorDesc').innerText = message;
-            document.getElementById('errorOverlay').style.display = 'flex';
+            const overlay = document.getElementById('errorOverlay');
+            if (overlay) {
+                document.getElementById('errorTitle').innerText = title;
+                document.getElementById('errorDesc').innerText = message;
+                overlay.style.display = 'flex';
+            }
+            const guide = document.getElementById('guideBox');
+            if (guide) guide.style.display = 'none';
+            const sound = document.getElementById('soundToggle');
+            if (sound) sound.style.display = 'none';
         }
 
         function parsePayload() {
-            // 1. Check URL Hash fragment (#token=...)
             const hash = window.location.hash || '';
             const query = window.location.search || '';
 
@@ -162,7 +196,6 @@
 
             if (rawToken) {
                 try {
-                    // Base64Url decode (URL safe)
                     let base64 = rawToken.replace(/-/g, '+').replace(/_/g, '/');
                     while (base64.length % 4 !== 0) {
                         base64 += '=';
@@ -170,14 +203,13 @@
                     const jsonStr = decodeURIComponent(escape(atob(base64)));
                     const data = JSON.parse(jsonStr);
 
-                    // Anti-tamper expiration check
                     if (data.exp && Date.now() > data.exp) {
-                        showError("Session Expired", "This AR scan session has expired for security. Please tap 'Scan Now' again from the Sylph app.");
+                        showError("Session Expired", "This AR scan session has expired. Please tap 'Scan Now' again from the Sylph mobile app.");
                         return null;
                     }
 
                     if (!data.m || !data.v) {
-                        showError("Invalid Session Data", "Missing marker or video information in encrypted token.");
+                        showError("Invalid Session Data", "Missing marker or video data in token.");
                         return null;
                     }
 
@@ -194,7 +226,7 @@
                 }
             }
 
-            // 2. Fallback to direct query params (for development or legacy calls)
+            // Fallback for direct query parameters (mind_url & video_url)
             const urlParams = new URLSearchParams(window.location.search);
             const mindUrl = urlParams.get('mind_url');
             const videoUrl = urlParams.get('video_url');
@@ -207,84 +239,65 @@
                 };
             }
 
-            // No valid payload found
             showError("Access Denied", "Direct URL access without an active Sylph scan session is restricted. Please launch from the mobile app.");
             return null;
         }
 
-        // Register A-Frame videohandler BEFORE scene is created
-        AFRAME.registerComponent('videohandler', {
-            init: function () {
-                const video = document.querySelector("#video");
-                const guideBox = document.querySelector("#guideBox");
-                this.el.addEventListener("targetFound", () => {
-                    if (guideBox) guideBox.style.display = "none";
-                    if (video) {
-                        const playPromise = video.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(error => {
-                                console.warn("Autoplay fallback to muted:", error);
-                                video.muted = true;
-                                video.play();
-                            });
-                        }
-                    }
-                });
-                this.el.addEventListener("targetLost", () => {
-                    if (guideBox) guideBox.style.display = "block";
-                    if (video) video.pause();
-                });
-            }
-        });
-
-        // Parse payload
         const payload = parsePayload();
 
         if (payload) {
-            // Show guide and sound toggle
-            document.getElementById('guideBox').style.display = 'block';
-            document.getElementById('soundToggle').style.display = 'flex';
+            // Write <a-scene> synchronously during initial HTML parse so A-Frame & MindAR initialize camera naturally
+            document.write(`
+                <a-scene mindar-image="imageTargetSrc: ${payload.mindUrl}; autoStart: true; uiLoading: yes; uiScanning: yes;"
+                    color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false"
+                    device-orientation-permission-ui="enabled: false">
+                    <a-assets>
+                        <video id="video" src="${payload.videoUrl}" loop crossorigin="anonymous" webkit-playsinline playsinline muted autoplay></video>
+                    </a-assets>
 
-            // Create A-Frame scene directly under body for full-screen camera stream
-            const scene = document.createElement('a-scene');
-            scene.setAttribute('mindar-image', `imageTargetSrc: ${payload.mindUrl}; autoStart: true; uiLoading: yes; uiScanning: yes;`);
-            scene.setAttribute('color-space', 'sRGB');
-            scene.setAttribute('renderer', 'colorManagement: true, physicallyCorrectLights');
-            scene.setAttribute('vr-mode-ui', 'enabled: false');
-            scene.setAttribute('device-orientation-permission-ui', 'enabled: false');
+                    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-            scene.innerHTML = `
-                <a-assets>
-                    <video id="video" src="${payload.videoUrl}" loop crossorigin="anonymous" webkit-playsinline playsinline muted autoplay></video>
-                </a-assets>
+                    <a-entity mindar-image-target="targetIndex: 0" videohandler>
+                        <a-plane width="${payload.width}" height="${payload.height}" position="0 0.18 0"
+                            material="shader: flat; src: #video" rotation="0 0 0"></a-plane>
+                    </a-entity>
+                </a-scene>
+            `);
 
-                <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+            // Attach scene lifecycle listeners
+            window.addEventListener('load', () => {
+                const scene = document.querySelector('a-scene');
+                if (scene) {
+                    scene.addEventListener('arReady', () => {
+                        console.log("MindAR camera stream is active and ready!");
+                    });
+                    scene.addEventListener('arError', (event) => {
+                        console.error("MindAR Camera Error:", event);
+                        showError("Camera Error", "Could not start camera feed: " + (event.detail?.error || "Permission or hardware lock."));
+                    });
+                }
+            });
 
-                <a-entity mindar-image-target="targetIndex: 0" videohandler>
-                    <a-plane width="${payload.width}" height="${payload.height}" position="0 0.18 0" material="shader: flat; src: #video" rotation="0 0 0"></a-plane>
-                </a-entity>
-            `;
-
-            document.body.appendChild(scene);
-
-            // Sound toggle handler
+            // Setup sound toggle
             const soundToggle = document.querySelector("#soundToggle");
             const iconMuted = document.querySelector("#iconMuted");
             const iconUnmuted = document.querySelector("#iconUnmuted");
 
-            soundToggle.addEventListener("click", () => {
-                const video = document.querySelector("#video");
-                if (!video) return;
-                video.muted = !video.muted;
-                if (video.muted) {
-                    iconMuted.style.display = "block";
-                    iconUnmuted.style.display = "none";
-                } else {
-                    iconMuted.style.display = "none";
-                    iconUnmuted.style.display = "block";
-                    video.play().catch(e => console.warn("Audio unlock required:", e));
-                }
-            });
+            if (soundToggle) {
+                soundToggle.addEventListener("click", () => {
+                    const video = document.querySelector("#video");
+                    if (!video) return;
+                    video.muted = !video.muted;
+                    if (video.muted) {
+                        iconMuted.style.display = "block";
+                        iconUnmuted.style.display = "none";
+                    } else {
+                        iconMuted.style.display = "none";
+                        iconUnmuted.style.display = "block";
+                        video.play().catch(e => console.warn("Audio unlock required:", e));
+                    }
+                });
+            }
         }
     </script>
 </body>
