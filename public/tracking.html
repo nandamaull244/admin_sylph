@@ -5,67 +5,173 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title>Sylph AR Tracking</title>
 
+    <!-- A-Frame 1.6.0 & MindAR 1.2.5 -->
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         html, body {
             margin: 0;
             padding: 0;
             height: 100%;
             width: 100%;
             overflow: hidden;
-            background: transparent !important;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #ffffff;
         }
 
-        /* Completely hide VR / AR enter buttons */
-        .a-enter-vr, .a-enter-vr-button, .a-enter-ar, [aframe-injected].a-enter-vr {
+        /* Completely hide VR / AR enter buttons injected by A-Frame */
+        .a-enter-vr, .a-enter-vr-button, .a-enter-ar, [aframe-injected].a-enter-vr, [aframe-injected].a-enter-ar {
             display: none !important;
             opacity: 0 !important;
             pointer-events: none !important;
             visibility: hidden !important;
         }
 
-        #guideBox {
-            position: fixed;
-            top: 24px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.72);
-            color: #ffffff;
-            padding: 10px 22px;
-            border-radius: 24px;
-            font-size: 13px;
-            font-weight: 600;
-            z-index: 9998;
-            pointer-events: none;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            text-align: center;
-            white-space: nowrap;
+        /* Suppress default blocking MindAR loading overlays */
+        .mindar-ui-overlay {
+            display: none !important;
         }
 
+        /* Top status & guide banner */
+        #statusBar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(18, 18, 24, 0.84);
+            color: #ffffff;
+            padding: 10px 22px;
+            border-radius: 30px;
+            font-size: 13.5px;
+            font-weight: 500;
+            z-index: 9998;
+            pointer-events: none;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease;
+            max-width: 90vw;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #ffab00;
+            display: inline-block;
+            box-shadow: 0 0 8px #ffab00;
+            animation: pulse-dot 1.5s infinite;
+        }
+
+        .status-dot.active {
+            background: #00e676;
+            box-shadow: 0 0 8px #00e676;
+            animation: none;
+        }
+
+        .status-dot.error {
+            background: #ff5252;
+            box-shadow: 0 0 8px #ff5252;
+            animation: none;
+        }
+
+        @keyframes pulse-dot {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.25); opacity: 1; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+
+        /* Bottom Floating Sound Control */
         #soundToggle {
             position: fixed;
             bottom: 24px;
             right: 24px;
             z-index: 9999;
-            background: rgba(0, 0, 0, 0.65);
+            background: rgba(18, 18, 24, 0.78);
             color: #ffffff;
-            border: 2px solid rgba(255, 255, 255, 0.4);
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 52px;
+            height: 52px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease, background 0.2s ease;
         }
 
+        #soundToggle:active {
+            transform: scale(0.92);
+        }
+
+        /* Action Card for Fallback / Manual Trigger */
+        #actionPrompt {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(18, 18, 24, 0.94);
+            color: white;
+            padding: 18px 24px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 9999;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            max-width: 88vw;
+            width: 340px;
+        }
+
+        #actionPrompt p {
+            margin: 0 0 12px 0;
+            font-size: 13.5px;
+            line-height: 1.4;
+            color: #e0e0e0;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: linear-gradient(135deg, #6B1B1A 0%, #9A2C2B 100%);
+            color: #ffffff;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(107, 27, 26, 0.4);
+            transition: opacity 0.2s ease;
+        }
+
+        .btn-primary:active {
+            opacity: 0.85;
+        }
+
+        /* Error Overlay */
         #errorOverlay {
             display: none;
             position: fixed;
@@ -73,7 +179,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(18, 18, 20, 0.95);
+            background: rgba(12, 12, 16, 0.96);
             color: white;
             z-index: 10000;
             flex-direction: column;
@@ -81,12 +187,11 @@
             justify-content: center;
             padding: 32px 24px;
             text-align: center;
-            box-sizing: border-box;
         }
 
         #errorOverlay h2 {
             margin: 0 0 10px 0;
-            font-size: 20px;
+            font-size: 21px;
             color: #ff5252;
             font-weight: 700;
         }
@@ -95,37 +200,114 @@
             color: #ccc;
             max-width: 420px;
             font-size: 14px;
-            line-height: 1.5;
+            line-height: 1.6;
             margin: 0 0 24px 0;
         }
 
-        #errorOverlay .icon-lock {
-            width: 56px;
-            height: 56px;
+        #errorOverlay .icon-box {
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
-            background: rgba(255, 82, 82, 0.15);
+            background: rgba(255, 82, 82, 0.12);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             color: #ff5252;
+        }
+
+        .btn-retry {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-retry:active {
+            background: rgba(255, 255, 255, 0.2);
         }
     </style>
 
     <script>
-        // Register videohandler in <head> BEFORE <a-scene> is parsed
+        // Global AR State
+        window.arState = {
+            cameraStarted: false,
+            targetReady: false,
+            videoPlaying: false
+        };
+
+        function updateStatus(text, dotClass = 'pulse') {
+            const bar = document.getElementById('statusBar');
+            const dot = document.getElementById('statusDot');
+            const msg = document.getElementById('statusText');
+            if (bar && dot && msg) {
+                msg.innerText = text;
+                dot.className = 'status-dot ' + (dotClass === 'active' ? 'active' : (dotClass === 'error' ? 'error' : ''));
+            }
+        }
+
+        function showError(title, message, isRetryable = false) {
+            const overlay = document.getElementById('errorOverlay');
+            if (overlay) {
+                document.getElementById('errorTitle').innerText = title;
+                document.getElementById('errorDesc').innerText = message;
+                const retryBtn = document.getElementById('retryBtn');
+                if (retryBtn) {
+                    retryBtn.style.display = isRetryable ? 'inline-block' : 'none';
+                }
+                overlay.style.display = 'flex';
+            }
+            const bar = document.getElementById('statusBar');
+            if (bar) bar.style.display = 'none';
+            const sound = document.getElementById('soundToggle');
+            if (sound) sound.style.display = 'none';
+            const action = document.getElementById('actionPrompt');
+            if (action) action.style.display = 'none';
+        }
+
+        function handleCameraError(err) {
+            console.error("[SylphAR] Camera access error:", err);
+            updateStatus("Camera Access Failed", "error");
+            if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                showError(
+                    "Camera Permission Denied",
+                    "Google Chrome does not have permission to access your camera. Tap the lock icon in Chrome's address bar (or Chrome Settings > Site settings > Camera) and set Camera to 'Allow', then refresh.",
+                    true
+                );
+            } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+                showError(
+                    "Camera Busy or Locked",
+                    "Another app or service on your device is currently locking the camera. Please close other camera apps, restart Chrome, and tap Retry.",
+                    true
+                );
+            } else {
+                showError(
+                    "Camera Initialization Error",
+                    "Could not access device camera: " + (err.message || err.name || "Unknown hardware issue"),
+                    true
+                );
+            }
+        }
+
+        // Register A-Frame videohandler component BEFORE scene parses
         AFRAME.registerComponent('videohandler', {
             init: function () {
                 const video = document.querySelector("#video");
-                const guideBox = document.querySelector("#guideBox");
                 this.el.addEventListener("targetFound", () => {
-                    console.log("Target Found! Playing AR video.");
-                    if (guideBox) guideBox.style.display = "none";
+                    console.log("[SylphAR] Target Found! Playing AR video.");
+                    window.arState.videoPlaying = true;
+                    updateStatus("✨ Photo frame recognized! Playing video", "active");
                     if (video) {
                         const playPromise = video.play();
                         if (playPromise !== undefined) {
                             playPromise.catch(error => {
-                                console.warn("Autoplay prevented, fallback to muted:", error);
+                                console.warn("[SylphAR] Video autoplay blocked, muting:", error);
                                 video.muted = true;
                                 video.play();
                             });
@@ -133,29 +315,97 @@
                     }
                 });
                 this.el.addEventListener("targetLost", () => {
-                    console.log("Target Lost.");
-                    if (guideBox) guideBox.style.display = "block";
+                    console.log("[SylphAR] Target Lost.");
+                    window.arState.videoPlaying = false;
+                    updateStatus("📷 Point camera at your photo frame", "active");
                     if (video) video.pause();
                 });
             }
         });
+
+        // Intercept getUserMedia to ensure playsinline and auto-play
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            const originalGUM = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+            navigator.mediaDevices.getUserMedia = async function (constraints) {
+                console.log("[SylphAR] Invoking getUserMedia:", constraints);
+                updateStatus("Requesting camera access...", "pulse");
+                try {
+                    const stream = await originalGUM(constraints);
+                    window.arState.cameraStarted = true;
+                    console.log("[SylphAR] Camera stream connected successfully!");
+                    updateStatus("Camera active. Loading AR target...", "pulse");
+
+                    const actionPrompt = document.getElementById("actionPrompt");
+                    if (actionPrompt) actionPrompt.style.display = "none";
+
+                    // Ensure video element created by MindAR starts streaming immediately
+                    const ensureVideoStreaming = () => {
+                        const allVideos = document.querySelectorAll('video');
+                        allVideos.forEach(v => {
+                            if (v.id !== 'video' && v.srcObject) {
+                                v.setAttribute('playsinline', '');
+                                v.setAttribute('webkit-playsinline', '');
+                                v.muted = true;
+                                const p = v.play();
+                                if (p) p.catch(() => {});
+                            }
+                        });
+                        if (!window.arState.targetReady) {
+                            setTimeout(ensureVideoStreaming, 250);
+                        }
+                    };
+                    setTimeout(ensureVideoStreaming, 100);
+
+                    return stream;
+                } catch (err) {
+                    handleCameraError(err);
+                    throw err;
+                }
+            };
+        }
+
+        async function forceRequestCamera() {
+            try {
+                updateStatus("Requesting camera permission...", "pulse");
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: { facingMode: "environment" }
+                });
+                // Attach stream if not already handled
+                const v = document.querySelector('body > video');
+                if (v && !v.srcObject) {
+                    v.srcObject = stream;
+                    v.play();
+                }
+                const prompt = document.getElementById("actionPrompt");
+                if (prompt) prompt.style.display = "none";
+            } catch (err) {
+                handleCameraError(err);
+            }
+        }
     </script>
 </head>
 
 <body>
-    <div id="errorOverlay">
-        <div class="icon-lock">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-        </div>
-        <h2 id="errorTitle">Access Restricted</h2>
-        <p id="errorDesc">Invalid or expired AR session. Please open the Sylph mobile app and tap 'Scan Now'.</p>
+    <!-- Top Status HUD -->
+    <div id="statusBar">
+        <span id="statusDot" class="status-dot"></span>
+        <span id="statusText">Starting camera...</span>
     </div>
 
-    <div id="guideBox">📷 Point camera at your photo frame</div>
+    <!-- Fallback / Permission Action Prompt -->
+    <div id="actionPrompt">
+        <p id="actionMsg">Camera access is taking longer than expected. Tap below to start the camera stream.</p>
+        <button class="btn-primary" onclick="forceRequestCamera()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            Activate Camera
+        </button>
+    </div>
 
+    <!-- Floating Sound Toggle Button -->
     <button id="soundToggle" title="Toggle Sound" aria-label="Toggle Sound">
         <svg id="iconMuted" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
@@ -168,20 +418,21 @@
         </svg>
     </button>
 
-    <script>
-        function showError(title, message) {
-            const overlay = document.getElementById('errorOverlay');
-            if (overlay) {
-                document.getElementById('errorTitle').innerText = title;
-                document.getElementById('errorDesc').innerText = message;
-                overlay.style.display = 'flex';
-            }
-            const guide = document.getElementById('guideBox');
-            if (guide) guide.style.display = 'none';
-            const sound = document.getElementById('soundToggle');
-            if (sound) sound.style.display = 'none';
-        }
+    <!-- Error Screen Overlay -->
+    <div id="errorOverlay">
+        <div class="icon-box">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        </div>
+        <h2 id="errorTitle">Notice</h2>
+        <p id="errorDesc">An error occurred while loading the AR experience.</p>
+        <button id="retryBtn" class="btn-retry" onclick="window.location.reload()">Tap to Retry</button>
+    </div>
 
+    <script>
         function parsePayload() {
             const hash = window.location.hash || '';
             const query = window.location.search || '';
@@ -204,12 +455,12 @@
                     const data = JSON.parse(jsonStr);
 
                     if (data.exp && Date.now() > data.exp) {
-                        showError("Session Expired", "This AR scan session has expired. Please tap 'Scan Now' again from the Sylph mobile app.");
+                        showError("Session Expired", "This AR scan session has expired. Please open the Sylph mobile app and tap 'Scan Now' again.");
                         return null;
                     }
 
                     if (!data.m || !data.v) {
-                        showError("Invalid Session Data", "Missing marker or video data in token.");
+                        showError("Invalid Session Data", "Missing marker target or video data in security token.");
                         return null;
                     }
 
@@ -220,13 +471,13 @@
                         height: parseFloat(data.h) || 1.0,
                     };
                 } catch (err) {
-                    console.error("Token decode error:", err);
-                    showError("Invalid Token", "Security token could not be decrypted. Please scan from the Sylph app.");
+                    console.error("[SylphAR] Token decode error:", err);
+                    showError("Invalid Security Token", "The AR session link could not be verified. Please launch from the Sylph mobile app.");
                     return null;
                 }
             }
 
-            // Fallback for direct query parameters (mind_url & video_url)
+            // Fallback for direct query parameters (for direct testing)
             const urlParams = new URLSearchParams(window.location.search);
             const mindUrl = urlParams.get('mind_url');
             const videoUrl = urlParams.get('video_url');
@@ -239,22 +490,20 @@
                 };
             }
 
-            showError("Access Denied", "Direct URL access without an active Sylph scan session is restricted. Please launch from the mobile app.");
+            showError("Access Denied", "Direct URL access without an active Sylph scan session is restricted. Please launch from the Sylph mobile app.");
             return null;
         }
 
         const payload = parsePayload();
 
         if (payload) {
-            // Write <a-scene> synchronously during initial HTML parse so A-Frame & MindAR initialize camera naturally
+            // Note: AR video is placed directly in <body> (not blocking <a-assets>) so scene initializes instantly
             document.write(`
-                <a-scene mindar-image="imageTargetSrc: ${payload.mindUrl}; autoStart: true; uiLoading: yes; uiScanning: yes;"
+                <video id="video" src="${payload.videoUrl}" preload="auto" loop crossorigin="anonymous" webkit-playsinline playsinline muted style="display: none;"></video>
+
+                <a-scene mindar-image="imageTargetSrc: ${payload.mindUrl}; autoStart: true; uiLoading: no; uiScanning: no;"
                     color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false"
                     device-orientation-permission-ui="enabled: false">
-                    <a-assets>
-                        <video id="video" src="${payload.videoUrl}" loop crossorigin="anonymous" webkit-playsinline playsinline muted autoplay></video>
-                    </a-assets>
-
                     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
                     <a-entity mindar-image-target="targetIndex: 0" videohandler>
@@ -264,21 +513,35 @@
                 </a-scene>
             `);
 
-            // Attach scene lifecycle listeners
+            // Attach scene event listeners
             window.addEventListener('load', () => {
                 const scene = document.querySelector('a-scene');
                 if (scene) {
                     scene.addEventListener('arReady', () => {
-                        console.log("MindAR camera stream is active and ready!");
+                        console.log("[SylphAR] MindAR AR target ready & tracking!");
+                        window.arState.targetReady = true;
+                        updateStatus("📷 Point camera at your photo frame", "active");
+
+                        const prompt = document.getElementById("actionPrompt");
+                        if (prompt) prompt.style.display = "none";
                     });
+
                     scene.addEventListener('arError', (event) => {
-                        console.error("MindAR Camera Error:", event);
-                        showError("Camera Error", "Could not start camera feed: " + (event.detail?.error || "Permission or hardware lock."));
+                        console.error("[SylphAR] MindAR Scene Error:", event);
+                        handleCameraError({ name: event.detail?.error || "MindARError", message: "Failed to initialize AR tracker." });
                     });
                 }
+
+                // Check camera status after 5 seconds to provide assistance if user is stuck
+                setTimeout(() => {
+                    if (!window.arState.cameraStarted) {
+                        const prompt = document.getElementById("actionPrompt");
+                        if (prompt) prompt.style.display = "block";
+                    }
+                }, 5000);
             });
 
-            // Setup sound toggle
+            // Sound Toggle Setup
             const soundToggle = document.querySelector("#soundToggle");
             const iconMuted = document.querySelector("#iconMuted");
             const iconUnmuted = document.querySelector("#iconUnmuted");
@@ -294,7 +557,7 @@
                     } else {
                         iconMuted.style.display = "none";
                         iconUnmuted.style.display = "block";
-                        video.play().catch(e => console.warn("Audio unlock required:", e));
+                        video.play().catch(e => console.warn("Audio unlock gesture required:", e));
                     }
                 });
             }
