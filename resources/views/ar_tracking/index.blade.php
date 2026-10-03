@@ -19,15 +19,7 @@
             overflow: hidden;
         }
 
-        a-scene {
-            width: 100vw !important;
-            height: 100vh !important;
-            position: fixed;
-            top: 0;
-            left: 0;
-            margin: 0;
-            padding: 0;
-        }
+
 
         #soundToggle {
             position: fixed;
@@ -63,9 +55,9 @@
         </svg>
     </button>
 
-    <a-scene mindar-image="imageTargetSrc: {{ $mindUrl }};" color-space="sRGB"
+    <a-scene mindar-image="imageTargetSrc: {{ $mindUrl }}; autoStart: true;" color-space="sRGB"
         renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false"
-        device-orientation-permission-ui="enabled: false" embedded>
+        device-orientation-permission-ui="enabled: false">
         <a-assets>
             <video id="video" src="{{ $videoUrl }}" loop crossorigin="anonymous" webkit-playsinline playsinline muted></video>
         </a-assets>
