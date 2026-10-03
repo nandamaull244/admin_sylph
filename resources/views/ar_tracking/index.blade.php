@@ -39,6 +39,19 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
+
+        /* Completely hide VR / AR enter buttons */
+        .a-enter-vr,
+        .a-enter-vr-button,
+        .a-enter-ar,
+        .a-enter-ar-button,
+        [aframe-injected].a-enter-vr,
+        [aframe-injected].a-enter-ar {
+            display: none !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            visibility: hidden !important;
+        }
     </style>
 </head>
 
